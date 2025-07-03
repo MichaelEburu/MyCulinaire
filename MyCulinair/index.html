@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCulinair</title>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --bg-light: #f0f9ff;
+            --text-dark: #1e3a8a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover {
+            background: var(--bg-light);
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .recipe-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .recipe-content {
+            padding: 1rem;
+        }
+
+        .recipe-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .recipe-source {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .pantry-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .pantry-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+        }
+
+        .button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+        }
+
+        .pantry-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .pantry-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-light);
+            border-radius: 4px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Chat Styles */
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .chat-button:hover {
+            background: var(--primary-dark);
+        }
+
+        .chat-container {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            position: relative;
+        }
+
+        .message.user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.bot {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .chat-input button {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background: var(--primary-dark);
+        }
+
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .recipe-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container {
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <h1>MyCulinair</h1>
+            <div class="nav-links">
+                <a href="#" onclick="showSection('home')">Home</a>
+                <a href="#" onclick="showSection('pantry')">Pantry</a>
+                <a href="#" onclick="showSection('filters')">Filters</a>
+                <a href="#" onclick="showSection('upgrade')">Upgrade</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Home Section -->
+        <section id="home-section">
+            <div class="pantry-section">
+                <h2>What's in your pantry?</h2>
+                <div class="pantry-form">
+                    <input type="text" id="ingredient-input" class="input" placeholder="Enter ingredients (comma separated)">
+                    <button class="button" onclick="findRecipes()">Find Recipes</button>
+                </div>
+            </div>
+            <div class="recipe-grid" id="recipe-grid"></div>
+        </section>
+
+        <!-- Pantry Section -->
+        <section id="pantry-section" style="display: none;">
+            <div class="pantry-section">
+                <h2>My Pantry</h2>
+                <div class="pantry-form">
+                    <input type="text" id="pantry-item" class="input" placeholder="Item name">
+                    <input type="date" id="expiry-date" class="input">
+                    <button class="button" onclick="addToPantry()">Add</button>
+                </div>
+                <div class="pantry-list" id="pantry-list"></div>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section id="filters-section" style="display: none;">
+            <div class="filter-section">
+                <h2>Dietary Filters</h2>
+                <div class="filter-grid" id="filter-grid"></div>
+                <h3>Exclude Allergies</h3>
+                <input type="text" id="allergies" class="input" placeholder="nuts,dairy">
+                <button class="button" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </section>
+
+        <!-- Upgrade Section -->
+        <section id="upgrade-section" style="display: none;">
+            <div class="pantry-section">
+                <h2>Upgrade to Premium</h2>
+                <p>Get access to premium features for just $3/month</p>
+                <button class="button" onclick="upgrade()">Subscribe Now</button>
+            </div>
+        </section>
+
+        <!-- Chat Interface -->
+        <button class="chat-button" onclick="toggleChat()">💬</button>
+        <div class="chat-container" id="chat-container">
+            <div class="chat-header">
+                <h3>AI Cooking Assistant</h3>
+                <button class="close-chat" onclick="toggleChat()">×</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Ask me anything about cooking..." onkeypress="handleChatInput(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <img id="modal-image" class="recipe-image">
+            <h3>Ingredients</h3>
+            <ul id="modal-ingredients"></ul>
+            <h3>Instructions</h3>
+            <ol id="modal-steps"></ol>
+            <button class="button" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SPOONACULAR_API_KEY = 'your-api-key-here'; // Replace with your Spoonacular API key
+
+        // State
+        let pantry = JSON.parse(localStorage.getItem('pantry') || '[]');
+        let recipes = [];
+        let filters = JSON.parse(localStorage.getItem('filters') || '[]');
+        let allergies = localStorage.getItem('allergies') || '';
+        let isPremium = JSON.parse(localStorage.getItem('isPremium') || 'false');
+
+        // Sample recipes (replace with API calls later)
+        const sampleRecipes = [
+            {
+                id: 1,
+                title: 'Spaghetti Carbonara',
+                image: 'https://source.unsplash.com/random/400x300/?pasta',
+                ingredients: ['Spaghetti', 'Eggs', 'Parmesan', 'Bacon'],
+                steps: ['Boil pasta', 'Cook bacon', 'Mix eggs and cheese', 'Combine all ingredients'],
+                source: 'Popular'
+            },
+            {
+                id: 2,
+                title: 'Avocado Toast',
+                image: 'https://source.unsplash.com/random/400x300/?avocado',
+                ingredients: ['Bread', 'Avocado', 'Salt', 'Pepper'],
+                steps: ['Toast bread', 'Mash avocado', 'Spread on toast', 'Season to taste'],
+                source: 'Quick & Easy'
+            }
+        ];
+
+        // Navigation
+        function showSection(section) {
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('pantry-section').style.display = 'none';
+            document.getElementById('filters-section').style.display = 'none';
+            document.getElementById('upgrade-section').style.display = 'none';
+            document.getElementById(section + '-section').style.display = 'block';
+        }
+
+        // Recipe Functions
+        function findRecipes() {
+            const ingredients = document.getElementById('ingredient-input').value;
+            // For now, just show sample recipes
+            displayRecipes(sampleRecipes);
+        }
+
+        function displayRecipes(recipes) {
+            const grid = document.getElementById('recipe-grid');
+            grid.innerHTML = recipes.map(recipe => `
+                <div class="recipe-card" onclick="showRecipe(${recipe.id})">
+                    <img src="${recipe.image}" alt="${recipe.title}" class="recipe-image">
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">${recipe.title}</h3>
+                        <p class="recipe-source">via ${recipe.source}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showRecipe(id) {
+            const recipe = sampleRecipes.find(r => r.id === id);
+            if (!recipe) return;
+
+            document.getElementById('modal-title').textContent = recipe.title;
+            document.getElementById('modal-image').src = recipe.image;
+            document.getElementById('modal-ingredients').innerHTML = 
+                recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('modal-steps').innerHTML = 
+                recipe.steps.map(s => `<li>${s}</li>`).join('');
+            document.getElementById('recipe-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('recipe-modal').style.display = 'none';
+        }
+
+        // Pantry Functions
+        function addToPantry() {
+            const name = document.getElementById('pantry-item').value.trim();
+            const date = document.getElementById('expiry-date').value;
+            if (!name) return;
+
+            pantry.push({ name, expiry: date });
+            localStorage.setItem('pantry', JSON.stringify(pantry));
+            displayPantry();
+            
+            document.getElementById('pantry-item').value = '';
+            document.getElementById('expiry-date').value = '';
+        }
+
+        function displayPantry() {
+            const list = document.getElementById('pantry-list');
+            list.innerHTML = pantry.map((item, index) => `
+                <div class="pantry-item">
+                    <span>${item.name}${item.expiry ? ` — expires ${item.expiry}` : ''}</span>
+                    <button class="button" onclick="removeFromPantry(${index})" style="background: #ef4444">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function removeFromPantry(index) {
+            pantry.splice(index, 1);
+            localStorage.setItem('pantry', JSON.stringify(pantry));
+            displayPantry();
+        }
+
+        // Filter Functions
+        function setupFilters() {
+            const options = [
+                'high-protein', 'low-protein', 'low-calories', 'low-carbs',
+                'low-fats', 'vegetarian', 'vegan', 'gluten-free', 'dairy-free'
+            ];
+            const labels = {
+                'high-protein': 'High Protein',
+                'low-protein': 'Low Protein',
+                'low-calories': 'Low Calories',
+                'low-carbs': 'Low Carbs',
+                'low-fats': 'Low Fats',
+                'vegetarian': 'Vegetarian',
+                'vegan': 'Vegan',
+                'gluten-free': 'Gluten-Free',
+                'dairy-free': 'Dairy-Free'
+            };
+
+            const grid = document.getElementById('filter-grid');
+            grid.innerHTML = options.map(opt => `
+                <label class="filter-option">
+                    <input type="checkbox" value="${opt}" 
+                        ${filters.includes(opt) ? 'checked' : ''}
+                        onchange="toggleFilter('${opt}')">
+                    ${labels[opt]}
+                </label>
+            `).join('');
+
+            document.getElementById('allergies').value = allergies;
+        }
+
+        function toggleFilter(filter) {
+            if (filters.includes(filter)) {
+                filters = filters.filter(f => f !== filter);
+            } else {
+                filters.push(filter);
+            }
+            localStorage.setItem('filters', JSON.stringify(filters));
+        }
+
+        function applyFilters() {
+            allergies = document.getElementById('allergies').value;
+            localStorage.setItem('allergies', allergies);
+            showSection('home');
+        }
+
+        // Upgrade Function
+        function upgrade() {
+            if (isPremium) {
+                alert('You are already a premium user!');
+                return;
+            }
+            isPremium = true;
+            localStorage.setItem('isPremium', 'true');
+            alert('Thank you for upgrading to premium!');
+            showSection('home');
+        }
+
+        // Chat functionality
+        function toggleChat() {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.style.display = chatContainer.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleChatInput(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + OPENAI_API_KEY
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [
+                            {
+                                role: "system",
+                                content: `You are a helpful cooking assistant. You can help with:
+                                - Recipe suggestions based on available ingredients
+                                - Cooking techniques and tips
+                                - Ingredient substitutions
+                                - Meal planning
+                                - Food safety and storage
+                                - Nutrition advice
+                                
+                                The user's current pantry ingredients are: ${getPantryIngredients().join(', ')}`
+                            },
+                            {
+                                role: "user",
+                                content: message
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 500
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get response');
+                }
+
+                const data = await response.json();
+                addMessage(data.choices[0].message.content, 'bot');
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        }
+
+        function addMessage(text, type) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function getPantryIngredients() {
+            const pantryItems = document.querySelectorAll('.pantry-item');
+            return Array.from(pantryItems).map(item => item.querySelector('span').textContent);
+        }
+
+        // Initialize
+        displayPantry();
+        setupFilters();
+        displayRecipes(sampleRecipes);
+    </script>
+</body>
+</html> 
