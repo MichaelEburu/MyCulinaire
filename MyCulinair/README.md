@@ -1,6 +1,6 @@
 # MyCulinair - AI-Powered Cooking Companion
 
-MyCulinair is a smart, user-centric React application designed to help users find recipes based on their pantry contents. It leverages multiple third-party APIs to fetch real-time recipes and provides an intuitive interface for managing ingredients and dietary preferences.
+MyCulinair is a smart, user-centric vanilla JavaScript application designed to help users find recipes based on their pantry contents. It leverages multiple third-party APIs to fetch real-time recipes and provides an intuitive interface for managing ingredients and dietary preferences.
 
 ## Features
 
@@ -13,9 +13,8 @@ MyCulinair is a smart, user-centric React application designed to help users fin
 
 ## Tech Stack
 
-- React 18
-- React Router v6
-- Tailwind CSS
+- Vanilla JavaScript (ES6+)
+- HTML5 & CSS3
 - Tesseract.js (OCR)
 - Stripe (Payments)
 - Multiple Recipe APIs (Spoonacular, Edamam, TheMealDB)
@@ -24,13 +23,13 @@ MyCulinair is a smart, user-centric React application designed to help users fin
 
 ### Prerequisites
 
-- Node.js 14.x or later
-- npm or yarn
+- Node.js 14.x or later (for backend API features)
 - API keys for:
   - Spoonacular
   - Edamam
   - TheMealDB
   - Stripe
+  - OpenAI (for AI chat features)
 
 ### Installation
 
@@ -40,51 +39,59 @@ MyCulinair is a smart, user-centric React application designed to help users fin
    cd myculinar
    ```
 
-2. Install dependencies:
+2. Install dependencies (for backend features):
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
 3. Create a `.env` file in the root directory with your API keys:
    ```
-   REACT_APP_SPOONACULAR_API_KEY=your_spoonacular_key
-   REACT_APP_EDAMAM_API_KEY=your_edamam_key
-   REACT_APP_THEMEALDB_API_KEY=your_themealdb_key
-   REACT_APP_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+   OPENAI_API_KEY=your_openai_key
+   SPOONACULAR_API_KEY=your_spoonacular_key
+   EDAMAM_API_KEY=your_edamam_key
+   THEMEALDB_API_KEY=your_themealdb_key
+   STRIPE_SECRET_KEY=your_stripe_key
    ```
 
-4. Start the development server:
+4. **To run with backend features:**
    ```bash
-   npm start
-   # or
-   yarn start
+   npm run server
    ```
+   Then open `public/index.html` in your browser.
 
-The application will be available at `http://localhost:3000`.
+5. **To run without backend (static version):**
+   Simply open `public/index.html` directly in your browser.
 
 ## Project Structure
 
 ```
 myculinar/
 ├── public/
-│   ├── index.html
-│   └── manifest.json
-├── src/
-│   ├── pages/
-│   │   ├── HomePage.js
-│   │   ├── PantryPage.js
-│   │   ├── CartPage.js
-│   │   ├── FilterPage.js
-│   │   └── UpgradePage.js
-│   ├── components/
-│   ├── App.js
-│   ├── index.js
-│   └── index.css
+│   ├── index.html          # Main HTML file
+│   ├── css/
+│   │   └── styles.css      # All styling
+│   └── js/
+│       ├── app.js          # Main application logic
+│       ├── cooking-assistant.js  # AI cooking assistant
+│       └── ai-features.js  # AI features
+├── server.js               # Express backend (optional)
 ├── package.json
 └── README.md
 ```
+
+## Usage
+
+### Static Version (Recommended)
+Simply open `public/index.html` in your browser. This gives you:
+- ✅ Recipe search and display
+- ✅ Pantry management
+- ✅ UI and styling
+- ❌ AI chat features (requires backend)
+
+### Full Version (with AI features)
+1. Start the backend server: `npm run server`
+2. Open `public/index.html` in your browser
+3. AI chat and backend features will be available
 
 ## Contributing
 

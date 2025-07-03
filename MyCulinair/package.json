@@ -4,7 +4,7 @@
   "description": "A cooking assistant app with AI chat functionality",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "server": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
@@ -15,5 +15,17 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 } 
