@@ -1,6 +1,6 @@
-# MyCulinair - AI-Powered Cooking Companion
+# MyCulinaire - AI-Powered Cooking Companion
 
-MyCulinair is a smart, user-centric vanilla JavaScript application designed to help users find recipes based on their pantry contents. It leverages multiple third-party APIs to fetch real-time recipes and provides an intuitive interface for managing ingredients and dietary preferences.
+MyCulinaire is a smart, user-centric vanilla JavaScript application designed to help users find recipes based on their pantry contents. It leverages multiple third-party APIs to fetch real-time recipes and provides an intuitive interface for managing ingredients and dietary preferences.
 
 ## Features
 
@@ -35,8 +35,8 @@ MyCulinair is a smart, user-centric vanilla JavaScript application designed to h
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/myculinar.git
-   cd myculinar
+   git clone https://github.com/yourusername/myculinaire.git
+   cd myculinaire
    ```
 
 2. Install dependencies (for backend features):
@@ -65,7 +65,7 @@ MyCulinair is a smart, user-centric vanilla JavaScript application designed to h
 ## Project Structure
 
 ```
-myculinar/
+myculinaire/
 ├── public/
 │   ├── index.html          # Main HTML file
 │   ├── css/

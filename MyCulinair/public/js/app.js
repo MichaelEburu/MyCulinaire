@@ -25,7 +25,8 @@ const state = {
         organic: false
     },
     allergies: [],
-    missingIngredientsFilter: 3 // Default: allow up to 3 missing ingredients
+    missingIngredientsFilter: 3, // Default: allow up to 3 missing ingredients
+    userLocation: null // Store user location for grocery delivery
 };
 
 // API Configuration
@@ -38,6 +39,63 @@ const API_CONFIG = {
         filter: '/filter.php?c=',
         lookup: '/lookup.php?i='
     }
+};
+
+// Grocery Delivery Configuration
+const GROCERY_CONFIG = {
+    // Mock data for demonstration - in production, you'd use real APIs
+    stores: [
+        {
+            name: 'Whole Foods Market',
+            distance: '0.8 miles',
+            deliveryTime: '1-2 hours',
+            deliveryFee: '$3.99',
+            minOrder: '$35',
+            rating: 4.6,
+            logo: '🛒',
+            available: true
+        },
+        {
+            name: 'Safeway',
+            distance: '1.2 miles',
+            deliveryTime: '1-3 hours',
+            deliveryFee: '$2.99',
+            minOrder: '$30',
+            rating: 4.3,
+            logo: '🛒',
+            available: true
+        },
+        {
+            name: 'Trader Joe\'s',
+            distance: '1.5 miles',
+            deliveryTime: '2-4 hours',
+            deliveryFee: '$4.99',
+            minOrder: '$40',
+            rating: 4.7,
+            logo: '🛒',
+            available: true
+        },
+        {
+            name: 'Target',
+            distance: '2.1 miles',
+            deliveryTime: '1-2 hours',
+            deliveryFee: '$1.99',
+            minOrder: '$25',
+            rating: 4.2,
+            logo: '🎯',
+            available: true
+        },
+        {
+            name: 'Walmart',
+            distance: '3.5 miles',
+            deliveryTime: '2-3 hours',
+            deliveryFee: '$0.99',
+            minOrder: '$20',
+            rating: 4.0,
+            logo: '🛒',
+            available: true
+        }
+    ]
 };
 
 // Initialize AI features and cooking assistant
@@ -586,7 +644,7 @@ async function searchIngredients() {
             // Convert to array and sort
             const ingredients = Array.from(ingredientSet).sort();
             
-            // Display ingredients in the recipes grid
+            // Display ingredients with grocery delivery options
             const grid = document.getElementById('recipes-grid');
             if (grid) {
                 if (ingredients.length === 0) {
@@ -610,6 +668,9 @@ async function searchIngredients() {
                                             </button>
                                             <button onclick="addIngredient('${ingredient}', '')" class="btn-secondary">
                                                 <i class="fas fa-plus"></i> Add to Pantry
+                                            </button>
+                                            <button onclick="showGroceryDelivery('${ingredient}')" class="btn-delivery">
+                                                <i class="fas fa-truck"></i> Find Delivery
                                             </button>
                                         </div>
                                     </div>
@@ -648,6 +709,9 @@ async function searchIngredients() {
                                         </button>
                                         <button onclick="addIngredient('${ingredient}', '')" class="btn-secondary">
                                             <i class="fas fa-plus"></i> Add to Pantry
+                                        </button>
+                                        <button onclick="showGroceryDelivery('${ingredient}')" class="btn-delivery">
+                                            <i class="fas fa-truck"></i> Find Delivery
                                         </button>
                                     </div>
                                 </div>
@@ -2217,5 +2281,380 @@ style.textContent = `
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(100%); opacity: 0; }
     }
+    
+    /* Grocery Delivery Styles */
+    .grocery-delivery-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    
+    .grocery-delivery-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .grocery-delivery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .grocery-delivery-header h3 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 1.3rem;
+    }
+    
+    .close-delivery-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+    }
+    
+    .close-delivery-modal:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .store-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .store-card {
+        border: 1px solid #e1e8ed;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .store-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .store-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .store-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+    
+    .store-logo {
+        font-size: 1.5rem;
+    }
+    
+    .store-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .store-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .store-detail i {
+        color: var(--primary-color);
+        width: 16px;
+    }
+    
+    .store-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .store-rating .stars {
+        color: #ffc107;
+    }
+    
+    .store-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-order {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s;
+        flex: 1;
+    }
+    
+    .btn-order:hover {
+        background: var(--primary-dark);
+    }
+    
+    .btn-view {
+        background: #f8f9fa;
+        color: #2c3e50;
+        border: 1px solid #e1e8ed;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+    
+    .btn-view:hover {
+        background: #e9ecef;
+        border-color: #bdc3c7;
+    }
+    
+    .location-prompt {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+    
+    .location-prompt button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 1rem;
+        transition: background-color 0.3s;
+    }
+    
+    .location-prompt button:hover {
+        background: var(--primary-dark);
+    }
+    
+    .btn-delivery {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .btn-delivery:hover {
+        background: linear-gradient(135deg, #229954, #27ae60);
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+        .grocery-delivery-content {
+            padding: 1rem;
+            width: 95%;
+        }
+        
+        .store-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .store-actions {
+            flex-direction: column;
+        }
+    }
 `;
 document.head.appendChild(style);
+
+// Grocery Delivery Functions
+function showGroceryDelivery(ingredient) {
+    // Remove any existing modals
+    const existingModal = document.querySelector('.grocery-delivery-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'grocery-delivery-modal';
+    
+    if (!state.userLocation) {
+        // Show location prompt
+        modal.innerHTML = `
+            <div class="grocery-delivery-content">
+                <div class="grocery-delivery-header">
+                    <h3>Find Grocery Delivery</h3>
+                    <button class="close-delivery-modal" onclick="closeGroceryDelivery()">&times;</button>
+                </div>
+                <div class="location-prompt">
+                    <i class="fas fa-map-marker-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <h4>Enable Location Services</h4>
+                    <p>To find grocery stores near you, we need your location.</p>
+                    <button onclick="getUserLocation('${ingredient}')">
+                        <i class="fas fa-location-arrow"></i> Enable Location
+                    </button>
+                </div>
+            </div>
+        `;
+    } else {
+        // Show stores
+        modal.innerHTML = `
+            <div class="grocery-delivery-content">
+                <div class="grocery-delivery-header">
+                    <h3>Grocery Delivery for "${ingredient}"</h3>
+                    <button class="close-delivery-modal" onclick="closeGroceryDelivery()">&times;</button>
+                </div>
+                <div class="store-list">
+                    ${GROCERY_CONFIG.stores.map(store => `
+                        <div class="store-card">
+                            <div class="store-header">
+                                <div class="store-name">${store.name}</div>
+                                <div class="store-logo">${store.logo}</div>
+                            </div>
+                            <div class="store-details">
+                                <div class="store-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${store.distance}</span>
+                                </div>
+                                <div class="store-detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${store.deliveryTime}</span>
+                                </div>
+                                <div class="store-detail">
+                                    <i class="fas fa-truck"></i>
+                                    <span>${store.deliveryFee}</span>
+                                </div>
+                                <div class="store-detail">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>Min: ${store.minOrder}</span>
+                                </div>
+                                <div class="store-rating">
+                                    <span class="stars">${'★'.repeat(Math.floor(store.rating))}${'☆'.repeat(5-Math.floor(store.rating))}</span>
+                                    <span>${store.rating}</span>
+                                </div>
+                            </div>
+                            <div class="store-actions">
+                                <button class="btn-order" onclick="orderFromStore('${store.name}', '${ingredient}')">
+                                    <i class="fas fa-shopping-cart"></i> Order Now
+                                </button>
+                                <button class="btn-view" onclick="viewStoreMenu('${store.name}')">
+                                    <i class="fas fa-eye"></i> View Menu
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    document.body.appendChild(modal);
+    
+    // Close on escape key
+    document.addEventListener('keydown', function closeOnEscape(e) {
+        if (e.key === 'Escape') {
+            closeGroceryDelivery();
+            document.removeEventListener('keydown', closeOnEscape);
+        }
+    });
+}
+
+function closeGroceryDelivery() {
+    const modal = document.querySelector('.grocery-delivery-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function getUserLocation(ingredient) {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                state.userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                saveState();
+                showGroceryDelivery(ingredient);
+            },
+            function(error) {
+                console.error('Error getting location:', error);
+                // Use mock location for demo
+                state.userLocation = {
+                    lat: 37.7749,
+                    lng: -122.4194
+                };
+                saveState();
+                showGroceryDelivery(ingredient);
+            }
+        );
+    } else {
+        // Fallback for browsers that don't support geolocation
+        state.userLocation = {
+            lat: 37.7749,
+            lng: -122.4194
+        };
+        saveState();
+        showGroceryDelivery(ingredient);
+    }
+}
+
+function orderFromStore(storeName, ingredient) {
+    // In a real app, this would redirect to the store's ordering system
+    // For demo purposes, we'll show a notification
+    showNotification(`Redirecting to ${storeName} to order ${ingredient}...`);
+    
+    // Simulate redirect after a short delay
+    setTimeout(() => {
+        // You could integrate with real delivery APIs here:
+        // - Instacart API
+        // - DoorDash API
+        // - Uber Eats API
+        // - Store-specific APIs
+        
+        alert(`In a real app, this would redirect to ${storeName}'s ordering system to purchase ${ingredient}.`);
+    }, 1000);
+}
+
+function viewStoreMenu(storeName) {
+    // In a real app, this would show the store's full menu
+    showNotification(`Opening ${storeName}'s menu...`);
+    
+    setTimeout(() => {
+        alert(`In a real app, this would show ${storeName}'s full grocery menu with prices and availability.`);
+    }, 1000);
+}
