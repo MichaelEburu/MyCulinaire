@@ -1,0 +1,13 @@
+[
+  {
+    "id": "user_1751834852680_5ha425dl6",
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "$2a$10$TPrNJRblrdjKUwj8RSroleSCFoF4kbN/B3/J46O4s15Ig5FqLfrH.",
+    "dietaryPreferences": [],
+    "allergies": [],
+    "cookingLevel": "Beginner",
+    "createdAt": "2025-07-06T20:47:32.680Z",
+    "updatedAt": "2025-07-06T20:47:32.681Z"
+  }
+]

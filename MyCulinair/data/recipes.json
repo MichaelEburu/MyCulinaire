@@ -1,0 +1,223 @@
+[
+  {
+    "id": "1",
+    "name": "Spaghetti Carbonara",
+    "description": "Classic Italian pasta dish with eggs, cheese, and pancetta",
+    "cuisine": "Italian",
+    "difficulty": "Medium",
+    "prepTime": 15,
+    "cookTime": 20,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "spaghetti",
+        "amount": 1,
+        "unit": "pound"
+      },
+      {
+        "name": "eggs",
+        "amount": 4,
+        "unit": "large"
+      },
+      {
+        "name": "pecorino cheese",
+        "amount": 1,
+        "unit": "cup",
+        "grated": true
+      },
+      {
+        "name": "pancetta",
+        "amount": 8,
+        "unit": "ounces",
+        "diced": true
+      },
+      {
+        "name": "black pepper",
+        "amount": 1,
+        "unit": "teaspoon"
+      },
+      {
+        "name": "salt",
+        "amount": 1,
+        "unit": "teaspoon"
+      }
+    ],
+    "instructions": [
+      "Bring a large pot of salted water to boil",
+      "Cook spaghetti according to package directions",
+      "In a large skillet, cook pancetta until crispy",
+      "In a bowl, whisk together eggs, cheese, and pepper",
+      "Drain pasta, reserving 1 cup of pasta water",
+      "Add hot pasta to skillet with pancetta",
+      "Remove from heat and quickly stir in egg mixture",
+      "Add pasta water as needed for creamy consistency"
+    ],
+    "tags": [
+      "pasta",
+      "italian",
+      "quick",
+      "dinner"
+    ],
+    "dietary": [
+      "vegetarian"
+    ],
+    "image": "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=400",
+    "rating": 4.5,
+    "reviewCount": 128
+  },
+  {
+    "id": "2",
+    "name": "Chicken Stir Fry",
+    "description": "Quick and healthy stir-fried chicken with vegetables",
+    "cuisine": "Asian",
+    "difficulty": "Easy",
+    "prepTime": 20,
+    "cookTime": 15,
+    "servings": 4,
+    "ingredients": [
+      {
+        "name": "chicken breast",
+        "amount": 1,
+        "unit": "pound",
+        "sliced": true
+      },
+      {
+        "name": "broccoli",
+        "amount": 2,
+        "unit": "cups",
+        "florets": true
+      },
+      {
+        "name": "carrots",
+        "amount": 2,
+        "unit": "medium",
+        "sliced": true
+      },
+      {
+        "name": "soy sauce",
+        "amount": 3,
+        "unit": "tablespoons"
+      },
+      {
+        "name": "garlic",
+        "amount": 3,
+        "unit": "cloves",
+        "minced": true
+      },
+      {
+        "name": "ginger",
+        "amount": 1,
+        "unit": "tablespoon",
+        "grated": true
+      },
+      {
+        "name": "vegetable oil",
+        "amount": 2,
+        "unit": "tablespoons"
+      }
+    ],
+    "instructions": [
+      "Slice chicken into thin strips",
+      "Heat oil in a large wok or skillet over high heat",
+      "Add chicken and stir-fry until golden, about 5 minutes",
+      "Add garlic and ginger, stir for 30 seconds",
+      "Add vegetables and stir-fry for 3-4 minutes",
+      "Add soy sauce and stir to combine",
+      "Serve hot over rice"
+    ],
+    "tags": [
+      "chicken",
+      "asian",
+      "healthy",
+      "quick"
+    ],
+    "dietary": [
+      "gluten-free"
+    ],
+    "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
+    "rating": 4.3,
+    "reviewCount": 89
+  },
+  {
+    "id": "3",
+    "name": "Vegetarian Chili",
+    "description": "Hearty vegetarian chili with beans and vegetables",
+    "cuisine": "Mexican",
+    "difficulty": "Easy",
+    "prepTime": 15,
+    "cookTime": 45,
+    "servings": 6,
+    "ingredients": [
+      {
+        "name": "kidney beans",
+        "amount": 2,
+        "unit": "cans",
+        "drained": true
+      },
+      {
+        "name": "black beans",
+        "amount": 1,
+        "unit": "can",
+        "drained": true
+      },
+      {
+        "name": "tomatoes",
+        "amount": 2,
+        "unit": "cans",
+        "diced": true
+      },
+      {
+        "name": "onion",
+        "amount": 1,
+        "unit": "large",
+        "diced": true
+      },
+      {
+        "name": "bell peppers",
+        "amount": 2,
+        "unit": "medium",
+        "diced": true
+      },
+      {
+        "name": "chili powder",
+        "amount": 2,
+        "unit": "tablespoons"
+      },
+      {
+        "name": "cumin",
+        "amount": 1,
+        "unit": "teaspoon"
+      },
+      {
+        "name": "garlic",
+        "amount": 3,
+        "unit": "cloves",
+        "minced": true
+      }
+    ],
+    "instructions": [
+      "Heat oil in a large pot over medium heat",
+      "Add onion and cook until softened, about 5 minutes",
+      "Add garlic and cook for 1 minute",
+      "Add bell peppers and cook for 3 minutes",
+      "Add chili powder and cumin, stir for 30 seconds",
+      "Add tomatoes, beans, and 1 cup water",
+      "Bring to boil, then simmer for 30 minutes",
+      "Season with salt and pepper to taste"
+    ],
+    "tags": [
+      "vegetarian",
+      "mexican",
+      "beans",
+      "soup"
+    ],
+    "dietary": [
+      "vegetarian",
+      "vegan",
+      "gluten-free"
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400",
+    "rating": 4.7,
+    "reviewCount": 156
+  }
+]

@@ -43,57 +43,114 @@ const API_CONFIG = {
 
 // Grocery Delivery Configuration
 const GROCERY_CONFIG = {
-    // Mock data for demonstration - in production, you'd use real APIs
-    stores: [
+    // Real store APIs and services
+    apis: {
+        googlePlaces: {
+            key: 'YOUR_GOOGLE_PLACES_API_KEY', // You'll need to get this from Google Cloud Console
+            baseUrl: 'https://maps.googleapis.com/maps/api/place'
+        },
+        yelp: {
+            key: 'YOUR_YELP_API_KEY', // You'll need to get this from Yelp Developer
+            baseUrl: 'https://api.yelp.com/v3'
+        },
+        instacart: {
+            key: 'YOUR_INSTACART_API_KEY', // If available
+            baseUrl: 'https://api.instacart.com'
+        }
+    },
+    
+    // Fallback store data for when APIs are not available
+    fallbackStores: [
         {
-            name: 'Whole Foods Market',
+            name: 'Walmart',
             distance: '0.8 miles',
             deliveryTime: '1-2 hours',
-            deliveryFee: '$3.99',
-            minOrder: '$35',
-            rating: 4.6,
+            deliveryFee: '$0.99',
+            minOrder: '$20',
+            rating: 4.0,
             logo: '🛒',
-            available: true
-        },
-        {
-            name: 'Safeway',
-            distance: '1.2 miles',
-            deliveryTime: '1-3 hours',
-            deliveryFee: '$2.99',
-            minOrder: '$30',
-            rating: 4.3,
-            logo: '🛒',
-            available: true
-        },
-        {
-            name: 'Trader Joe\'s',
-            distance: '1.5 miles',
-            deliveryTime: '2-4 hours',
-            deliveryFee: '$4.99',
-            minOrder: '$40',
-            rating: 4.7,
-            logo: '🛒',
-            available: true
+            available: true,
+            address: '123 Main St, Your City',
+            phone: '(555) 123-4567',
+            website: 'https://www.walmart.com'
         },
         {
             name: 'Target',
-            distance: '2.1 miles',
+            distance: '1.2 miles',
             deliveryTime: '1-2 hours',
             deliveryFee: '$1.99',
             minOrder: '$25',
             rating: 4.2,
             logo: '🎯',
-            available: true
+            available: true,
+            address: '456 Oak Ave, Your City',
+            phone: '(555) 234-5678',
+            website: 'https://www.target.com'
         },
         {
-            name: 'Walmart',
-            distance: '3.5 miles',
-            deliveryTime: '2-3 hours',
-            deliveryFee: '$0.99',
-            minOrder: '$20',
-            rating: 4.0,
+            name: 'Amazon',
+            distance: 'Online',
+            deliveryTime: '1-2 days',
+            deliveryFee: 'Free with Prime',
+            minOrder: '$25',
+            rating: 4.5,
+            logo: '📦',
+            available: true,
+            address: 'Online Store',
+            phone: 'N/A',
+            website: 'https://www.amazon.com'
+        },
+        {
+            name: 'Instacart',
+            distance: 'Local stores',
+            deliveryTime: '1-3 hours',
+            deliveryFee: '$2.99-$5.99',
+            minOrder: '$10',
+            rating: 4.3,
             logo: '🛒',
-            available: true
+            available: true,
+            address: 'Multiple local stores',
+            phone: 'N/A',
+            website: 'https://www.instacart.com'
+        },
+        {
+            name: 'Whole Foods Market',
+            distance: '1.5 miles',
+            deliveryTime: '1-2 hours',
+            deliveryFee: '$3.99',
+            minOrder: '$35',
+            rating: 4.6,
+            logo: '🛒',
+            available: true,
+            address: '789 Pine St, Your City',
+            phone: '(555) 345-6789',
+            website: 'https://www.wholefoodsmarket.com'
+        },
+        {
+            name: 'Safeway',
+            distance: '2.1 miles',
+            deliveryTime: '1-3 hours',
+            deliveryFee: '$2.99',
+            minOrder: '$30',
+            rating: 4.3,
+            logo: '🛒',
+            available: true,
+            address: '321 Elm St, Your City',
+            phone: '(555) 456-7890',
+            website: 'https://www.safeway.com'
+        },
+        {
+            name: 'Kroger',
+            distance: '2.5 miles',
+            deliveryTime: '1-3 hours',
+            deliveryFee: '$2.99',
+            minOrder: '$25',
+            rating: 4.1,
+            logo: '🛒',
+            available: true,
+            address: '654 Maple Dr, Your City',
+            phone: '(555) 567-8901',
+            website: 'https://www.kroger.com'
         }
     ]
 };
@@ -284,9 +341,35 @@ function renderHomePage() {
 }
 
 // Handle Enter key press in search input
+function handleSearch() {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput.value.trim().toLowerCase();
+    
+    // List of common ingredients that should show ingredient results first
+    const ingredientKeywords = [
+        'rice', 'pasta', 'bread', 'flour', 'sugar', 'salt', 'pepper', 'oil', 'butter',
+        'milk', 'cheese', 'eggs', 'chicken', 'beef', 'pork', 'fish', 'shrimp', 'salmon',
+        'tomatoes', 'onions', 'garlic', 'carrots', 'potatoes', 'apples', 'bananas',
+        'lemons', 'limes', 'basil', 'oregano', 'cinnamon', 'vanilla', 'honey',
+        'yogurt', 'cream', 'mayonnaise', 'mustard', 'ketchup', 'soy sauce',
+        'vinegar', 'wine', 'beer', 'juice', 'water', 'tea', 'coffee'
+    ];
+    
+    // Check if the search query is likely an ingredient
+    const isIngredientSearch = ingredientKeywords.some(keyword => 
+        query.includes(keyword) || keyword.includes(query)
+    );
+    
+    if (isIngredientSearch) {
+        searchIngredients();
+    } else {
+        searchRecipes();
+    }
+}
+
 function handleSearchKeyPress(event) {
     if (event.key === 'Enter') {
-        searchIngredients();
+        handleSearch();
     }
 }
 
@@ -594,6 +677,55 @@ async function searchRecipes() {
             }
         }
         
+        // If no recipes found, try broader search strategies
+        if (recipes.length === 0 && query) {
+            const fallbackStrategies = [
+                // Try searching by first word only
+                async () => {
+                    const firstWord = query.split(' ')[0];
+                    if (firstWord !== query) {
+                        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.search}${encodeURIComponent(firstWord)}`);
+                        const data = await response.json();
+                        return data.meals || [];
+                    }
+                    return [];
+                },
+                // Try searching by category
+                async () => {
+                    const response = await fetch(`${API_CONFIG.baseUrl}/filter.php?c=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    return data.meals || [];
+                },
+                // Try searching by area/cuisine
+                async () => {
+                    const response = await fetch(`${API_CONFIG.baseUrl}/filter.php?a=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    return data.meals || [];
+                },
+                // Get random recipes as final fallback
+                async () => {
+                    const promises = Array(6).fill().map(() => 
+                        fetch(`${API_CONFIG.baseUrl}/random.php`).then(r => r.json())
+                    );
+                    const results = await Promise.all(promises);
+                    return results.map(r => r.meals && r.meals[0]).filter(Boolean);
+                }
+            ];
+            
+            for (const strategy of fallbackStrategies) {
+                try {
+                    const fallbackResults = await strategy();
+                    if (fallbackResults.length > 0) {
+                        recipes = fallbackResults;
+                        break;
+                    }
+                } catch (error) {
+                    console.warn('Fallback strategy failed:', error);
+                    continue;
+                }
+            }
+        }
+        
         // Limit to 12 recipes and render
         renderRecipes(recipes.slice(0, 12));
     } catch (error) {
@@ -613,25 +745,30 @@ async function searchIngredients() {
     }
     
     try {
-        // Search for recipes containing the ingredient
+        // First, try to find recipes with this ingredient
         const response = await fetch(`${API_CONFIG.baseUrl}/filter.php?i=${encodeURIComponent(query)}`);
         const data = await response.json();
         
+        let ingredients = [];
+        let recipes = [];
+        
         if (data.meals && data.meals.length > 0) {
-            // Get unique ingredients from these recipes
-            const ingredientSet = new Set();
+            // Get recipes and extract ingredients
+            recipes = data.meals.slice(0, 8); // Get up to 8 recipes
             
-            // Fetch details for a few recipes to extract ingredients
+            // Fetch details for recipes to extract ingredients
             const recipeDetails = await Promise.all(
-                data.meals.slice(0, 5).map(meal => 
+                recipes.map(meal => 
                     fetch(`${API_CONFIG.baseUrl}/lookup.php?i=${meal.idMeal}`).then(r => r.json())
                 )
             );
             
+            const ingredientSet = new Set();
+            
             recipeDetails.forEach(recipeData => {
                 if (recipeData.meals && recipeData.meals[0]) {
-                    const ingredients = getRecipeIngredients(recipeData.meals[0]);
-                    ingredients.forEach(ingredient => {
+                    const recipeIngredients = getRecipeIngredients(recipeData.meals[0]);
+                    recipeIngredients.forEach(ingredient => {
                         // Clean and add ingredient
                         const cleanIngredient = ingredient.split(' ').slice(-1)[0]; // Get main ingredient name
                         if (cleanIngredient.toLowerCase().includes(query.toLowerCase())) {
@@ -641,65 +778,193 @@ async function searchIngredients() {
                 }
             });
             
-            // Convert to array and sort
-            const ingredients = Array.from(ingredientSet).sort();
-            
-            // Display ingredients with grocery delivery options
-            const grid = document.getElementById('recipes-grid');
-            if (grid) {
-                if (ingredients.length === 0) {
-                    grid.innerHTML = `
-                        <div class="no-recipes">
-                            <i class="fas fa-search"></i>
-                            <p>No ingredients found for "${query}". Try a different search term!</p>
-                        </div>
-                    `;
-                } else {
-                    grid.innerHTML = `
-                        <div class="ingredients-grid">
-                            <h3>Ingredients found for "${query}":</h3>
-                            ${ingredients.map(ingredient => `
-                                <div class="ingredient-card">
-                                    <div class="ingredient-content">
-                                        <h4>${ingredient}</h4>
-                                        <div class="ingredient-actions">
-                                            <button onclick="addToCart('${ingredient}', 'Ingredient Search', '')" class="add-to-cart-btn">
-                                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                                            </button>
-                                            <button onclick="addIngredient('${ingredient}', '')" class="btn-secondary">
-                                                <i class="fas fa-plus"></i> Add to Pantry
-                                            </button>
-                                            <button onclick="showGroceryDelivery('${ingredient}')" class="btn-delivery">
-                                                <i class="fas fa-truck"></i> Find Delivery
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
-            }
-        } else {
-            // No recipes found, show common ingredients that might match
-            const commonIngredients = [
-                'Chicken', 'Beef', 'Pork', 'Fish', 'Shrimp', 'Salmon', 'Tuna',
-                'Rice', 'Pasta', 'Bread', 'Potatoes', 'Onions', 'Garlic', 'Tomatoes',
-                'Cheese', 'Milk', 'Eggs', 'Butter', 'Olive Oil', 'Salt', 'Pepper',
-                'Carrots', 'Broccoli', 'Spinach', 'Lettuce', 'Cucumber', 'Bell Peppers',
-                'Lemons', 'Limes', 'Oranges', 'Apples', 'Bananas', 'Strawberries'
+            ingredients = Array.from(ingredientSet).sort();
+        }
+        
+        // If no recipes found, expand search with broader terms
+        if (ingredients.length === 0) {
+            // Try different search variations
+            const searchVariations = [
+                query,
+                query.replace(/s$/, ''), // Remove 's' (e.g., tomatoes -> tomato)
+                query.replace(/es$/, ''), // Remove 'es' (e.g., potatoes -> potato)
+                query.split(' ')[0] // First word only
             ];
             
+            for (const variation of searchVariations) {
+                try {
+                    const variationResponse = await fetch(`${API_CONFIG.baseUrl}/filter.php?i=${encodeURIComponent(variation)}`);
+                    const variationData = await variationResponse.json();
+                    
+                    if (variationData.meals && variationData.meals.length > 0) {
+                        recipes = variationData.meals.slice(0, 8);
+                        break;
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+        }
+        
+        // Enhanced common ingredients list with detailed categories
+        const commonIngredients = [
+            // Rice varieties
+            'White Rice', 'Brown Rice', 'Basmati Rice', 'Jasmine Rice', 'Arborio Rice', 'Wild Rice', 'Sushi Rice', 'Long Grain Rice', 'Short Grain Rice',
+            // Pasta varieties
+            'Spaghetti', 'Penne', 'Fettuccine', 'Linguine', 'Rigatoni', 'Macaroni', 'Lasagna', 'Farfalle', 'Rotini', 'Orzo',
+            // Bread varieties
+            'White Bread', 'Whole Wheat Bread', 'Sourdough Bread', 'Rye Bread', 'Pita Bread', 'Naan Bread', 'Baguette', 'Ciabatta',
+            // Proteins
+            'Chicken', 'Chicken Breast', 'Chicken Thighs', 'Ground Chicken', 'Beef', 'Ground Beef', 'Steak', 'Pork', 'Pork Chops', 'Bacon', 'Ham', 'Sausage',
+            'Fish', 'Salmon', 'Tuna', 'Shrimp', 'Crab', 'Lamb', 'Turkey', 'Ground Turkey',
+            // Dairy
+            'Milk', 'Cheese', 'Cheddar Cheese', 'Mozzarella Cheese', 'Parmesan Cheese', 'Cream Cheese', 'Yogurt', 'Cream', 'Sour Cream', 'Butter', 'Heavy Cream',
+            // Vegetables
+            'Tomatoes', 'Onions', 'Garlic', 'Carrots', 'Potatoes', 'Sweet Potatoes', 'Broccoli', 'Spinach', 'Lettuce', 'Cucumber', 'Bell Peppers', 'Mushrooms',
+            'Avocado', 'Corn', 'Peas', 'Green Beans', 'Asparagus', 'Zucchini', 'Eggplant', 'Cauliflower', 'Brussels Sprouts',
+            // Fruits
+            'Apples', 'Bananas', 'Strawberries', 'Blueberries', 'Lemons', 'Limes', 'Oranges', 'Grapes', 'Pineapple', 'Mango',
+            // Herbs and Spices
+            'Basil', 'Oregano', 'Thyme', 'Rosemary', 'Cinnamon', 'Nutmeg', 'Vanilla', 'Black Pepper', 'Salt', 'Garlic Powder', 'Onion Powder',
+            // Pantry staples
+            'Flour', 'All Purpose Flour', 'Bread Flour', 'Sugar', 'Brown Sugar', 'Honey', 'Maple Syrup', 'Olive Oil', 'Vegetable Oil', 'Soy Sauce',
+            'Vinegar', 'Balsamic Vinegar', 'Mayonnaise', 'Mustard', 'Ketchup', 'Hot Sauce', 'Worcestershire Sauce',
+            // Nuts and Seeds
+            'Almonds', 'Walnuts', 'Pecans', 'Cashews', 'Peanuts', 'Sunflower Seeds', 'Pumpkin Seeds', 'Chia Seeds',
+            // Beverages
+            'Water', 'Tea', 'Coffee', 'Juice', 'Wine', 'Beer', 'Milk', 'Almond Milk', 'Soy Milk'
+        ];
+        
+        // For common ingredient searches, always show the comprehensive list
+        const ingredientKeywords = [
+            'rice', 'pasta', 'bread', 'flour', 'sugar', 'salt', 'pepper', 'oil', 'butter',
+            'milk', 'cheese', 'eggs', 'chicken', 'beef', 'pork', 'fish', 'shrimp', 'salmon',
+            'tomatoes', 'onions', 'garlic', 'carrots', 'potatoes', 'apples', 'bananas',
+            'lemons', 'limes', 'basil', 'oregano', 'cinnamon', 'vanilla', 'honey',
+            'yogurt', 'cream', 'mayonnaise', 'mustard', 'ketchup', 'soy sauce',
+            'vinegar', 'wine', 'beer', 'juice', 'water', 'tea', 'coffee'
+        ];
+        
+        const isCommonIngredient = ingredientKeywords.some(keyword => 
+            query.toLowerCase().includes(keyword) || keyword.includes(query.toLowerCase())
+        );
+        
+        if (isCommonIngredient) {
+            // For common ingredients, always show the comprehensive list
             const matchingIngredients = commonIngredients.filter(ingredient => 
                 ingredient.toLowerCase().includes(query.toLowerCase())
             );
             
-            const grid = document.getElementById('recipes-grid');
-            if (grid) {
-                grid.innerHTML = `
+            if (matchingIngredients.length > 0) {
+                // Sort by relevance - exact matches first, then partial matches
+                ingredients = matchingIngredients.sort((a, b) => {
+                    const aLower = a.toLowerCase();
+                    const bLower = b.toLowerCase();
+                    const queryLower = query.toLowerCase();
+                    
+                    // Exact match gets highest priority
+                    if (aLower === queryLower) return -1;
+                    if (bLower === queryLower) return 1;
+                    
+                    // Starts with query gets second priority
+                    if (aLower.startsWith(queryLower)) return -1;
+                    if (bLower.startsWith(queryLower)) return 1;
+                    
+                    // Contains query gets third priority
+                    if (aLower.includes(queryLower)) return -1;
+                    if (bLower.includes(queryLower)) return 1;
+                    
+                    return 0;
+                });
+            } else {
+                // Add the search query itself as a suggested ingredient
+                ingredients = [query.charAt(0).toUpperCase() + query.slice(1)];
+            }
+        } else if (ingredients.length === 0) {
+            // For other searches, only use common ingredients if no API results found
+            const matchingIngredients = commonIngredients.filter(ingredient => 
+                ingredient.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (matchingIngredients.length > 0) {
+                ingredients = matchingIngredients.sort((a, b) => {
+                    const aLower = a.toLowerCase();
+                    const bLower = b.toLowerCase();
+                    const queryLower = query.toLowerCase();
+                    
+                    if (aLower === queryLower) return -1;
+                    if (bLower === queryLower) return 1;
+                    if (aLower.startsWith(queryLower)) return -1;
+                    if (bLower.startsWith(queryLower)) return 1;
+                    if (aLower.includes(queryLower)) return -1;
+                    if (bLower.includes(queryLower)) return 1;
+                    return 0;
+                });
+            } else {
+                ingredients = [query.charAt(0).toUpperCase() + query.slice(1)];
+            }
+        }
+        
+        // Display results
+        const grid = document.getElementById('recipes-grid');
+        if (grid) {
+            let html = '';
+            
+            // Use the isCommonIngredient variable we already calculated above
+            
+            // For common ingredients, show ONLY ingredients, not recipes
+            if (isCommonIngredient) {
+                html = `
                     <div class="ingredients-grid">
-                        <h3>Suggested ingredients for "${query}":</h3>
-                        ${matchingIngredients.map(ingredient => `
+                        <h3>Ingredients related to "${query}":</h3>
+                        ${ingredients.map(ingredient => `
+                            <div class="ingredient-card">
+                                <div class="ingredient-content">
+                                    <h4>${ingredient}</h4>
+                                    <div class="ingredient-actions">
+                                        <button onclick="addToCart('${ingredient}', 'Ingredient Search', '')" class="add-to-cart-btn">
+                                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                                        </button>
+                                        <button onclick="addIngredient('${ingredient}', '')" class="btn-secondary">
+                                            <i class="fas fa-plus"></i> Add to Pantry
+                                        </button>
+                                        <button onclick="showGroceryDelivery('${ingredient}')" class="btn-delivery">
+                                            <i class="fas fa-truck"></i> Find Delivery
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                // For other searches, show both recipes and ingredients
+                if (recipes.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 2rem;">
+                            <h3 style="color: #2c3e50; margin-bottom: 1rem;">Recipes using "${query}":</h3>
+                            <div class="recipes-grid">
+                                ${recipes.map(recipe => `
+                                    <div class="recipe-card" onclick="showRecipeDetails('${recipe.idMeal}')">
+                                        <img src="${recipe.strMealThumb}" alt="${recipe.strMeal}" class="recipe-image">
+                                        <div class="recipe-content">
+                                            <h3>${recipe.strMeal}</h3>
+                                            <div class="recipe-meta">
+                                                <span><i class="fas fa-utensils"></i> ${recipe.strCategory}</span>
+                                                <span><i class="fas fa-globe"></i> ${recipe.strArea}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                    <div class="ingredients-grid">
+                        <h3>Ingredients related to "${query}":</h3>
+                        ${ingredients.map(ingredient => `
                             <div class="ingredient-card">
                                 <div class="ingredient-content">
                                     <h4>${ingredient}</h4>
@@ -720,6 +985,8 @@ async function searchIngredients() {
                     </div>
                 `;
             }
+            
+            grid.innerHTML = html;
         }
     } catch (error) {
         console.error('Error searching ingredients:', error);
@@ -734,21 +1001,83 @@ function renderRecipes(recipes) {
     if (!grid) return;
 
     if (!recipes || recipes.length === 0) {
-        if (state.ingredients.length === 0) {
-        grid.innerHTML = `
-            <div class="no-recipes">
-                <i class="fas fa-utensils"></i>
-                    <p>No recipes found. Try a different search or add ingredients to your pantry!</p>
-            </div>
-        `;
+        const searchInput = document.getElementById('search-input');
+        const query = searchInput ? searchInput.value.trim() : '';
+        
+        let message = '';
+        let suggestions = '';
+        
+        if (query) {
+            message = `No recipes found for "${query}".`;
+            suggestions = `
+                <div class="search-suggestions">
+                    <h4>Try these suggestions:</h4>
+                    <ul>
+                        <li>Check your spelling</li>
+                        <li>Try a broader search term (e.g., "chicken" instead of "chicken breast")</li>
+                        <li>Search by cuisine type (e.g., "Italian", "Mexican")</li>
+                        <li>Search by meal type (e.g., "dessert", "breakfast")</li>
+                        <li>Add ingredients to your pantry to find recipes that use them</li>
+                    </ul>
+                    <div class="suggestion-buttons">
+                        <button onclick="searchRecipes()" class="btn-primary">
+                            <i class="fas fa-random"></i> Show Random Recipes
+                        </button>
+                        <button onclick="showPage('pantry')" class="btn-secondary">
+                            <i class="fas fa-plus"></i> Add Ingredients to Pantry
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (state.ingredients.length === 0) {
+            message = 'No recipes found.';
+            suggestions = `
+                <div class="search-suggestions">
+                    <h4>Get started:</h4>
+                    <ul>
+                        <li>Search for recipes by name or ingredient</li>
+                        <li>Add ingredients to your pantry to find recipes that use them</li>
+                        <li>Browse popular recipes below</li>
+                    </ul>
+                    <div class="suggestion-buttons">
+                        <button onclick="loadInitialRecipes()" class="btn-primary">
+                            <i class="fas fa-utensils"></i> Show Popular Recipes
+                        </button>
+                        <button onclick="showPage('pantry')" class="btn-secondary">
+                            <i class="fas fa-plus"></i> Add Ingredients to Pantry
+                        </button>
+                    </div>
+                </div>
+            `;
         } else {
-            grid.innerHTML = `
-                <div class="no-recipes">
-                    <i class="fas fa-utensils"></i>
-                    <p>No recipes found using your pantry ingredients. Try adding different ingredients or search for something else!</p>
+            message = 'No recipes found using your pantry ingredients.';
+            suggestions = `
+                <div class="search-suggestions">
+                    <h4>Try these options:</h4>
+                    <ul>
+                        <li>Add more ingredients to your pantry</li>
+                        <li>Search for specific recipes</li>
+                        <li>Try different ingredient combinations</li>
+                    </ul>
+                    <div class="suggestion-buttons">
+                        <button onclick="searchRecipes()" class="btn-primary">
+                            <i class="fas fa-search"></i> Search Recipes
+                        </button>
+                        <button onclick="showPage('pantry')" class="btn-secondary">
+                            <i class="fas fa-plus"></i> Add More Ingredients
+                        </button>
+                    </div>
                 </div>
             `;
         }
+        
+        grid.innerHTML = `
+            <div class="no-recipes">
+                <i class="fas fa-utensils"></i>
+                <p>${message}</p>
+                ${suggestions}
+            </div>
+        `;
         return;
     }
 
@@ -2501,7 +2830,7 @@ style.textContent = `
 document.head.appendChild(style);
 
 // Grocery Delivery Functions
-function showGroceryDelivery(ingredient) {
+function showGroceryDelivery(ingredient, stores = null) {
     // Remove any existing modals
     const existingModal = document.querySelector('.grocery-delivery-modal');
     if (existingModal) {
@@ -2531,6 +2860,9 @@ function showGroceryDelivery(ingredient) {
             </div>
         `;
     } else {
+        // Use provided stores or fallback
+        const storeList = stores || GROCERY_CONFIG.fallbackStores;
+        
         // Show stores
         modal.innerHTML = `
             <div class="grocery-delivery-content">
@@ -2539,7 +2871,7 @@ function showGroceryDelivery(ingredient) {
                     <button class="close-delivery-modal" onclick="closeGroceryDelivery()">&times;</button>
                 </div>
                 <div class="store-list">
-                    ${GROCERY_CONFIG.stores.map(store => `
+                    ${storeList.map(store => `
                         <div class="store-card">
                             <div class="store-header">
                                 <div class="store-name">${store.name}</div>
@@ -2562,6 +2894,10 @@ function showGroceryDelivery(ingredient) {
                                     <i class="fas fa-shopping-bag"></i>
                                     <span>Min: ${store.minOrder}</span>
                                 </div>
+                                <div class="store-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${store.address || 'Address not available'}</span>
+                                </div>
                                 <div class="store-rating">
                                     <span class="stars">${'★'.repeat(Math.floor(store.rating))}${'☆'.repeat(5-Math.floor(store.rating))}</span>
                                     <span>${store.rating}</span>
@@ -2574,6 +2910,11 @@ function showGroceryDelivery(ingredient) {
                                 <button class="btn-view" onclick="viewStoreMenu('${store.name}')">
                                     <i class="fas fa-eye"></i> View Menu
                                 </button>
+                                ${store.website ? `
+                                    <button class="btn-website" onclick="window.open('${store.website}', '_blank')">
+                                        <i class="fas fa-external-link-alt"></i> Visit Website
+                                    </button>
+                                ` : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -2600,16 +2941,118 @@ function closeGroceryDelivery() {
     }
 }
 
+// Fetch real stores from APIs
+async function fetchRealStores(lat, lng, ingredient) {
+    try {
+        let stores = [];
+        
+        // Try Google Places API first
+        if (GROCERY_CONFIG.apis.googlePlaces.key !== 'YOUR_GOOGLE_PLACES_API_KEY') {
+            try {
+                const response = await fetch(
+                    `${GROCERY_CONFIG.apis.googlePlaces.baseUrl}/nearbysearch/json?` +
+                    `location=${lat},${lng}&radius=5000&type=grocery_or_supermarket&` +
+                    `keyword=${encodeURIComponent(ingredient)}&key=${GROCERY_CONFIG.apis.googlePlaces.key}`
+                );
+                const data = await response.json();
+                
+                if (data.results) {
+                    stores = data.results.slice(0, 10).map(place => ({
+                        name: place.name,
+                        distance: calculateDistance(lat, lng, place.geometry.location.lat, place.geometry.location.lng),
+                        deliveryTime: '1-3 hours',
+                        deliveryFee: '$2.99-$5.99',
+                        minOrder: '$25-$35',
+                        rating: place.rating || 4.0,
+                        logo: '🛒',
+                        available: true,
+                        address: place.vicinity,
+                        phone: place.formatted_phone_number || 'N/A',
+                        website: place.website || null,
+                        placeId: place.place_id
+                    }));
+                }
+            } catch (error) {
+                console.warn('Google Places API failed:', error);
+            }
+        }
+        
+        // Try Yelp API as backup
+        if (stores.length === 0 && GROCERY_CONFIG.apis.yelp.key !== 'YOUR_YELP_API_KEY') {
+            try {
+                const response = await fetch(
+                    `${GROCERY_CONFIG.apis.yelp.baseUrl}/businesses/search?` +
+                    `latitude=${lat}&longitude=${lng}&radius=5000&categories=grocery&` +
+                    `term=${encodeURIComponent(ingredient)}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${GROCERY_CONFIG.apis.yelp.key}`
+                        }
+                    }
+                );
+                const data = await response.json();
+                
+                if (data.businesses) {
+                    stores = data.businesses.slice(0, 10).map(business => ({
+                        name: business.name,
+                        distance: calculateDistance(lat, lng, business.coordinates.latitude, business.coordinates.longitude),
+                        deliveryTime: '1-3 hours',
+                        deliveryFee: '$2.99-$5.99',
+                        minOrder: '$25-$35',
+                        rating: business.rating,
+                        logo: '🛒',
+                        available: true,
+                        address: business.location.address1,
+                        phone: business.phone,
+                        website: business.url
+                    }));
+                }
+            } catch (error) {
+                console.warn('Yelp API failed:', error);
+            }
+        }
+        
+        // If no real data, use fallback stores
+        if (stores.length === 0) {
+            stores = GROCERY_CONFIG.fallbackStores.map(store => ({
+                ...store,
+                distance: calculateDistance(lat, lng, 37.7749, -122.4194) // Mock distance
+            }));
+        }
+        
+        return stores;
+    } catch (error) {
+        console.error('Error fetching stores:', error);
+        return GROCERY_CONFIG.fallbackStores;
+    }
+}
+
+// Calculate distance between two points
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance < 1 ? `${Math.round(distance * 5280)} feet` : `${distance.toFixed(1)} miles`;
+}
+
 function getUserLocation(ingredient) {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            function(position) {
+            async function(position) {
                 state.userLocation = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
                 saveState();
-                showGroceryDelivery(ingredient);
+                
+                // Fetch real stores
+                const stores = await fetchRealStores(position.coords.latitude, position.coords.longitude, ingredient);
+                showGroceryDelivery(ingredient, stores);
             },
             function(error) {
                 console.error('Error getting location:', error);
@@ -2619,7 +3062,7 @@ function getUserLocation(ingredient) {
                     lng: -122.4194
                 };
                 saveState();
-                showGroceryDelivery(ingredient);
+                showGroceryDelivery(ingredient, GROCERY_CONFIG.fallbackStores);
             }
         );
     } else {
@@ -2629,32 +3072,63 @@ function getUserLocation(ingredient) {
             lng: -122.4194
         };
         saveState();
-        showGroceryDelivery(ingredient);
+        showGroceryDelivery(ingredient, GROCERY_CONFIG.fallbackStores);
     }
 }
 
 function orderFromStore(storeName, ingredient) {
-    // In a real app, this would redirect to the store's ordering system
-    // For demo purposes, we'll show a notification
-    showNotification(`Redirecting to ${storeName} to order ${ingredient}...`);
+    // Direct product search URLs for major retailers
+    const productSearchUrls = {
+        'Walmart': `https://www.walmart.com/search/?query=${encodeURIComponent(ingredient)}`,
+        'Target': `https://www.target.com/s?searchTerm=${encodeURIComponent(ingredient)}`,
+        'Amazon': `https://www.amazon.com/s?k=${encodeURIComponent(ingredient)}&i=grocery`,
+        'Instacart': `https://www.instacart.com/store/search/v3/products?query=${encodeURIComponent(ingredient)}`,
+        'Whole Foods Market': `https://www.amazon.com/s?k=${encodeURIComponent(ingredient)}&i=wholefoods`,
+        'Safeway': `https://www.safeway.com/shop/search-results.html?q=${encodeURIComponent(ingredient)}`,
+        'Kroger': `https://www.kroger.com/search?query=${encodeURIComponent(ingredient)}`,
+        'Albertsons': `https://www.albertsons.com/shop/search-results.html?q=${encodeURIComponent(ingredient)}`,
+        'Publix': `https://shop.publix.com/search?search-bar=${encodeURIComponent(ingredient)}`,
+        'Meijer': `https://www.meijer.com/shopping/search.html?search=${encodeURIComponent(ingredient)}`,
+        'H-E-B': `https://www.heb.com/search?q=${encodeURIComponent(ingredient)}`,
+        'Giant Eagle': `https://shop.gianteagle.com/search?q=${encodeURIComponent(ingredient)}`,
+        'Stop & Shop': `https://stopandshop.com/search?q=${encodeURIComponent(ingredient)}`,
+        'Food Lion': `https://www.foodlion.com/search?q=${encodeURIComponent(ingredient)}`,
+        'ShopRite': `https://shop.shoprite.com/search?q=${encodeURIComponent(ingredient)}`
+    };
     
-    // Simulate redirect after a short delay
-    setTimeout(() => {
-        // You could integrate with real delivery APIs here:
-        // - Instacart API
-        // - DoorDash API
-        // - Uber Eats API
-        // - Store-specific APIs
-        
-        alert(`In a real app, this would redirect to ${storeName}'s ordering system to purchase ${ingredient}.`);
-    }, 1000);
+    // Try to find a direct product search URL
+    const directUrl = productSearchUrls[storeName];
+    
+    if (directUrl) {
+        showNotification(`Opening ${storeName} to buy ${ingredient}...`);
+        setTimeout(() => {
+            window.open(directUrl, '_blank');
+        }, 1000);
+    } else {
+        // Fallback: search for the store + ingredient
+        showNotification(`Searching for ${ingredient} at ${storeName}...`);
+        setTimeout(() => {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(storeName + ' ' + ingredient + ' buy online')}`;
+            window.open(searchUrl, '_blank');
+        }, 1000);
+    }
 }
 
 function viewStoreMenu(storeName) {
-    // In a real app, this would show the store's full menu
-    showNotification(`Opening ${storeName}'s menu...`);
+    // Try to find the store in our data
+    const store = [...GROCERY_CONFIG.fallbackStores, ...(state.realStores || [])]
+        .find(s => s.name === storeName);
     
-    setTimeout(() => {
-        alert(`In a real app, this would show ${storeName}'s full grocery menu with prices and availability.`);
-    }, 1000);
+    if (store && store.website) {
+        showNotification(`Opening ${storeName}'s menu...`);
+        setTimeout(() => {
+            window.open(store.website, '_blank');
+        }, 1000);
+    } else {
+        showNotification(`Searching for ${storeName}'s menu...`);
+        setTimeout(() => {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(storeName + ' grocery menu prices')}`;
+            window.open(searchUrl, '_blank');
+        }, 1000);
+    }
 }
