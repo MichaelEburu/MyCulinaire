@@ -23,7 +23,7 @@ body {
 }
 
 .nav h1 {
-    color: #fff;
+    color: var(--cream-white);
     font-size: 1.7rem;
     letter-spacing: 1px;
     text-shadow: 0 2px 8px rgba(141,164,126,0.10);
@@ -81,7 +81,7 @@ main {
 /* Buttons */
 .btn-primary {
     background-color: var(--primary-color);
-    color: #fff;
+    color: var(--cream-white);
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 4px;
@@ -100,7 +100,7 @@ main {
 
 .btn-secondary {
     background-color: var(--secondary-color);
-    color: #fff;
+    color: var(--cream-white);
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 4px;
@@ -122,7 +122,7 @@ main {
 }
 
 .recipe-card {
-    background: white;
+    background: var(--cream-white);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -152,7 +152,7 @@ main {
     text-align: center;
     max-width: 90%;
     margin: 0 auto;
-    background: #f8fafd;
+    background: var(--primary-light);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(52,152,219,0.06);
     position: relative;
@@ -176,7 +176,7 @@ main {
 
 /* Pantry Section */
 .pantry-section {
-    background: white;
+    background: var(--cream-white);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -226,7 +226,7 @@ main {
 .remove-btn {
     background: none;
     border: none;
-    color: #bbb;
+    color: var(--spice-brown);
     font-size: 1.3rem;
     cursor: pointer;
     padding: 0.3rem 0.6rem;
@@ -235,7 +235,7 @@ main {
 }
 
 .remove-btn:hover {
-    background: #f2f6fa;
+    background: var(--primary-light);
     color: #e74c3c;
 }
 
@@ -255,7 +255,7 @@ main {
 
 /* Filters Section */
 .filters-section {
-    background: linear-gradient(135deg, #f8fafd 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--cream-white) 100%);
     padding: 2.5rem;
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.08);
@@ -297,7 +297,7 @@ main {
     align-items: center;
     gap: 0.8rem;
     padding: 1rem 1.2rem;
-    background: white;
+    background: var(--cream-white);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     transition: all 0.3s ease;
@@ -324,7 +324,7 @@ main {
 
 .allergies-section {
     margin-top: 2rem;
-    background: white;
+    background: var(--cream-white);
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -340,18 +340,18 @@ main {
 .add-allergen select {
     flex: 1;
     padding: 1rem 1.2rem;
-    border: 2px solid #e1e8ed;
+    border: 2px solid var(--primary-light);
     border-radius: 8px;
     font-size: 1rem;
-    background: white;
+    background: var(--cream-white);
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .add-allergen select:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(141, 164, 126, 0.1);
 }
 
 .add-allergen button {
@@ -407,7 +407,7 @@ main {
 
 /* Upgrade Section */
 .upgrade-section {
-    background: white;
+    background: var(--cream-white);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -430,7 +430,7 @@ main {
 
 .feature i {
     font-size: 2rem;
-    color: #3498db;
+    color: var(--primary-color);
     margin-bottom: 1rem;
 }
 
@@ -445,12 +445,12 @@ main {
     display: flex;
     justify-content: space-around;
     box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-    color: #fff;
+    color: var(--cream-white);
     z-index: 1000;
 }
 
 .footer-link {
-    color: #fff;
+    color: var(--cream-white);
     text-decoration: none;
     display: flex;
     flex-direction: column;
@@ -487,7 +487,7 @@ main {
 }
 
 .recipe-content {
-    background: white;
+    background: var(--cream-white);
     border-radius: 12px;
     padding: 2rem;
     max-width: 1200px;
@@ -603,7 +603,7 @@ main {
 
 /* Cooking Assistant Chat Styles */
 .cooking-assistant {
-    background: #fff;
+    background: var(--cream-white);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     padding: 1.5rem;
@@ -632,7 +632,7 @@ main {
 }
 
 .message.user {
-    background: #e3f2fd;
+    background: var(--primary-light);
     align-self: flex-end;
 }
 
@@ -660,8 +660,8 @@ main {
 }
 
 .chat-input button {
-    background: #4A90E2;
-    color: #fff;
+    background: var(--primary-color);
+    color: var(--cream-white);
     border: none;
     border-radius: 8px;
     padding: 0.7rem 1.2rem;
@@ -671,7 +671,7 @@ main {
 }
 
 .chat-input button:hover {
-    background: #357ABD;
+    background: var(--primary-dark);
 }
 
 /* Responsive Design */
@@ -787,15 +787,15 @@ main {
     --accent: #b5c99a; /* Soft accent green */
     --secondary-color: #e2b887; /* Warm tan (for contrast) */
     --text-color: #3e4632; /* Deep olive */
-    --background-color: #f6f7f2; /* Light sage background */
-    --card-background: #f9faf7; /* Slightly off-white */
+    --background-color: #f8f6f0; /* Creamy sage background */
+    --card-background: #faf8f2; /* Creamy off-white */
     --success-color: #a3c585; /* Fresh green */
     --warning-color: #e2b887; /* Warm tan */
     --food-orange: #e2b887; /* Warm tan for food accent */
     --tomato-red: #c97b63; /* Muted tomato */
     --carrot-orange: #e2b887; /* Carrot-inspired tan */
     --spice-brown: #a89f91; /* Earthy brown */
-    --cream-white: #f9faf7; /* Cream white */
+    --cream-white: #faf8f2; /* Creamy white */
 }
 
 .recipe-meta span {
@@ -808,15 +808,15 @@ main {
 }
 
 .missing-ingredients {
-    background-color: #e3f2fd;
-    border: 1px solid #90caf9;
+    background-color: var(--primary-light);
+    border: 1px solid var(--primary-color);
     border-radius: 10px;
     padding: 20px;
     margin: 20px 0;
 }
 
 .missing-ingredients h4 {
-    color: #1565c0;
+    color: var(--primary-dark);
     margin-bottom: 10px;
     font-size: 1.1rem;
     display: flex;
@@ -834,13 +834,13 @@ main {
 }
 
 .missing-ingredients li {
-    color: #1976d2;
+    color: var(--primary-dark);
     padding: 8px;
-    background: #bbdefb;
+    background: var(--accent);
     border-radius: 5px;
 }
 
-.blue-header {
+.sage-header {
     background: var(--primary-color);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1.5rem 0 1.5rem 0;
@@ -850,7 +850,7 @@ main {
 }
 
 .centered-title {
-    color: #fff;
+    color: var(--cream-white);
     font-size: 2rem;
     font-weight: bold;
     margin: 0 auto;
@@ -949,11 +949,11 @@ main {
 }
 
 .missing-ingredients-filter {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafd 100%);
+    background: linear-gradient(135deg, var(--cream-white) 0%, var(--primary-light) 100%);
     padding: 2rem;
     border-radius: 16px;
     margin-bottom: 2.5rem;
-    border: 2px solid rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(141, 164, 126, 0.1);
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     position: relative;
     overflow: hidden;
@@ -966,7 +966,7 @@ main {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #3498db, #2980b9, #3498db);
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-dark), var(--primary-color));
     background-size: 200% 100%;
     animation: shimmer 2s ease-in-out infinite;
 }
@@ -989,7 +989,7 @@ main {
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #e1e8ed 0%, #bdc3c7 100%);
+    background: linear-gradient(90deg, var(--primary-light) 0%, var(--primary-light) 100%);
     outline: none;
     margin-bottom: 1rem;
     -webkit-appearance: none;
@@ -1003,7 +1003,7 @@ main {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
     border: 3px solid white;
@@ -1019,7 +1019,7 @@ main {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     cursor: pointer;
     border: 3px solid white;
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
@@ -1035,7 +1035,7 @@ main {
     display: flex;
     justify-content: space-between;
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: var(--text-color);
     margin-top: 1rem;
     font-weight: 500;
     flex-wrap: wrap;
@@ -1044,7 +1044,7 @@ main {
 
 .slider-labels span {
     padding: 0.4rem 0.8rem;
-    background: rgba(52, 152, 219, 0.1);
+    background: rgba(141, 164, 126, 0.1);
     border-radius: 15px;
     transition: all 0.3s ease;
     font-size: 0.85rem;
@@ -1057,7 +1057,7 @@ main {
 }
 
 #missing-count {
-    color: #3498db;
+    color: var(--primary-color);
     font-weight: bold;
     font-size: 1.2rem;
     text-shadow: 0 1px 2px rgba(52, 152, 219, 0.2);
@@ -1082,14 +1082,14 @@ main {
     gap: 1.5rem;
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafd 100%);
+    background: linear-gradient(135deg, var(--cream-white) 0%, var(--primary-light) 100%);
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
 
 .profile-avatar {
     font-size: 4rem;
-    color: #3498db;
+    color: var(--primary-color);
 }
 
 .profile-info h2 {
@@ -1099,7 +1099,7 @@ main {
 }
 
 .profile-info p {
-    color: #7f8c8d;
+    color: var(--text-color);
     margin: 0;
 }
 
@@ -1111,7 +1111,7 @@ main {
 }
 
 .stat-card {
-    background: white;
+    background: var(--cream-white);
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -1128,7 +1128,7 @@ main {
 
 .stat-card i {
     font-size: 2rem;
-    color: #3498db;
+    color: var(--primary-color);
 }
 
 .stat-content h3 {
@@ -1139,7 +1139,7 @@ main {
 }
 
 .stat-content p {
-    color: #7f8c8d;
+    color: var(--text-color);
     margin: 0;
     font-size: 0.9rem;
 }
@@ -1148,7 +1148,7 @@ main {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 2rem;
-    background: white;
+    background: var(--cream-white);
     padding: 0.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -1162,7 +1162,7 @@ main {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: #7f8c8d;
+    color: var(--text-color);
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -1171,12 +1171,12 @@ main {
 }
 
 .tab-button:hover {
-    background: rgba(52, 152, 219, 0.1);
-    color: #3498db;
+    background: rgba(141, 164, 126, 0.1);
+    color: var(--primary-color);
 }
 
 .tab-button.active {
-    background: #3498db;
+    background: var(--primary-color);
     color: white;
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
@@ -1190,12 +1190,12 @@ main {
 .no-content {
     text-align: center;
     padding: 3rem 1rem;
-    color: #7f8c8d;
+    color: var(--text-color);
 }
 
 .no-content i {
     font-size: 3rem;
-    color: #bdc3c7;
+    color: var(--primary-light);
     margin-bottom: 1rem;
 }
 
@@ -1220,7 +1220,7 @@ main {
 .add-friend input {
     flex: 1;
     padding: 0.8rem 1rem;
-    border: 2px solid #e1e8ed;
+    border: 2px solid var(--primary-light);
     border-radius: 8px;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -1228,8 +1228,8 @@ main {
 
 .add-friend input:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(141, 164, 126, 0.1);
 }
 
 .friends-list {
@@ -1243,20 +1243,20 @@ main {
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: #f8fafd;
+    background: var(--primary-light);
     border-radius: 12px;
     transition: all 0.3s ease;
 }
 
 .friend-item:hover {
-    background: #e3f2fd;
+    background: var(--primary-light);
     transform: translateX(4px);
 }
 
 .friend-avatar {
     width: 40px;
     height: 40px;
-    background: #3498db;
+    background: var(--primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1276,7 +1276,7 @@ main {
 
 .friend-info p {
     margin: 0;
-    color: #7f8c8d;
+    color: var(--text-color);
     font-size: 0.9rem;
 }
 
@@ -1300,10 +1300,10 @@ main {
 }
 
 .pantry-comparison .pantry-section {
-    background: #f8fafd;
+    background: var(--primary-light);
     padding: 1.5rem;
     border-radius: 8px;
-    border: 1px solid #e1e8ed;
+    border: 1px solid var(--primary-light);
 }
 
 .pantry-comparison .pantry-section h3 {
@@ -1315,7 +1315,7 @@ main {
 .shared-ingredients {
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #e1e8ed;
+    border-top: 1px solid var(--primary-light);
 }
 
 .shared-ingredients h3 {
@@ -1346,7 +1346,7 @@ main {
 
 /* Combined Pantry Summary */
 .combined-pantry-summary {
-    background: #f8fafd;
+    background: var(--primary-light);
     padding: 1.5rem;
     border-radius: 8px;
     margin: 2rem 0;
@@ -1366,7 +1366,7 @@ main {
 .stat {
     text-align: center;
     padding: 1rem;
-    background: white;
+    background: var(--cream-white);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -1375,13 +1375,13 @@ main {
     display: block;
     font-size: 2rem;
     font-weight: bold;
-    color: #3498db;
+    color: var(--primary-color);
 }
 
 .stat-label {
     display: block;
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: var(--text-color);
     margin-top: 0.5rem;
 }
 
@@ -1397,13 +1397,13 @@ main {
 .no-recipes {
     text-align: center;
     padding: 3rem 1rem;
-    color: #7f8c8d;
+    color: var(--text-color);
 }
 
 .no-recipes i {
     font-size: 3rem;
     margin-bottom: 1rem;
-    color: #bdc3c7;
+    color: var(--primary-light);
 }
 
 .no-recipes p {
@@ -1478,12 +1478,12 @@ main {
 }
 
 .suggestion-buttons .btn-secondary {
-    background-color: #95a5a6;
+    background-color: var(--primary-color);
     color: white;
 }
 
 .suggestion-buttons .btn-secondary:hover {
-    background-color: #7f8c8d;
+    background-color: var(--text-color);
     transform: translateY(-2px);
 }
 
@@ -1511,7 +1511,7 @@ main {
 }
 
 .setting-group {
-    border-bottom: 1px solid #e1e8ed;
+    border-bottom: 1px solid var(--primary-light);
     padding-bottom: 1.5rem;
 }
 
@@ -1543,7 +1543,7 @@ main {
 .setting-item input[type="text"],
 .setting-item input[type="email"] {
     padding: 0.8rem 1rem;
-    border: 2px solid #e1e8ed;
+    border: 2px solid var(--primary-light);
     border-radius: 8px;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -1552,8 +1552,8 @@ main {
 .setting-item input[type="text"]:focus,
 .setting-item input[type="email"]:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(141, 164, 126, 0.1);
 }
 
 .setting-item input[type="checkbox"] {
@@ -1638,7 +1638,7 @@ main {
 }
 
 .edit-modal-content {
-    background: white;
+    background: var(--cream-white);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -1703,7 +1703,7 @@ main {
 }
 
 .edit-btn {
-    background: #3498db;
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: 0.5rem;
@@ -1714,7 +1714,7 @@ main {
 }
 
 .edit-btn:hover {
-    background: #2980b9;
+    background: var(--primary-dark);
 }
 
 .no-expiry {
@@ -1725,7 +1725,7 @@ main {
 
 /* Cart Section */
 .cart-section {
-    background: white;
+    background: var(--cream-white);
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -2065,12 +2065,12 @@ main {
 }
 
 .ingredient-card {
-    background: white;
+    background: var(--cream-white);
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
     transition: transform 0.3s, box-shadow 0.3s;
-    border: 1px solid #e8f4fd;
+    border: 1px solid var(--primary-light);
 }
 
 .ingredient-card:hover {
@@ -2108,24 +2108,24 @@ main {
 }
 
 .ingredient-actions .add-to-cart-btn {
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
 }
 
 .ingredient-actions .add-to-cart-btn:hover {
-    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-dark));
     transform: translateY(-2px);
 }
 
 .ingredient-actions .btn-secondary {
-    background: #ecf0f1;
+    background: var(--primary-light);
     color: #2c3e50;
-    border: 1px solid #bdc3c7;
+    border: 1px solid var(--primary-light);
 }
 
 .ingredient-actions .btn-secondary:hover {
-    background: #d5dbdb;
-    border-color: #95a5a6;
+    background: var(--primary-light);
+    border-color: var(--primary-color);
 }
 
 @media (max-width: 768px) {
