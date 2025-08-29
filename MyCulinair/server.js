@@ -11,15 +11,27 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Initialize OpenAI
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+// Initialize OpenAI (only if API key is provided)
+let openai = null;
+if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here') {
+    openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+    });
+} else {
+    console.log('Warning: OPENAI_API_KEY not found. AI chat features will be disabled.');
+}
 
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
     try {
         const { message, pantryIngredients } = req.body;
+
+        if (!openai) {
+            return res.status(503).json({ 
+                error: 'AI service is not available. Please set up your OpenAI API key in the .env file.',
+                message: 'I apologize, but the AI cooking assistant is currently unavailable. Please check your API configuration.'
+            });
+        }
 
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",

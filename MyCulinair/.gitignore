@@ -60,6 +60,5 @@ jspm_packages/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp 
+# Test files
+test-*.html 

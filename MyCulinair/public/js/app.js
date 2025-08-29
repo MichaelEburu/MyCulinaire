@@ -208,6 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof idx !== 'undefined') {
         document.querySelectorAll('.footer-link')[idx].classList.add('active');
     }
+    
+    // Scroll to active link after a short delay to ensure toolbar is initialized
+    setTimeout(() => {
+        if (window.ToolbarScroll && window.toolbarScroll) {
+            window.toolbarScroll.scrollToActive();
+        }
+    }, 100);
 });
 
 // Load state from localStorage
@@ -1356,6 +1363,7 @@ function renderPantryPage() {
                     <i class="fas fa-camera"></i> Scan Ingredient
                 </button>
             </div>
+
             <div id="ingredients-container" class="ingredients-list">
                 <!-- Ingredients will be loaded here -->
             </div>
@@ -1383,16 +1391,61 @@ function renderIngredients() {
     container.innerHTML = state.ingredients.map(item => {
         const addedDate = item.addedDate ? new Date(item.addedDate).toLocaleDateString() : '';
         const expiry = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '';
+        
+        // Calculate days until expiry
+        let daysUntilExpiry = null;
+        let expiryStatus = '';
+        if (item.expiryDate) {
+            const today = new Date();
+            const expiryDate = new Date(item.expiryDate);
+            const diffTime = expiryDate - today;
+            daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (daysUntilExpiry < 0) {
+                expiryStatus = 'expired';
+            } else if (daysUntilExpiry <= 3) {
+                expiryStatus = 'urgent';
+            } else if (daysUntilExpiry <= 7) {
+                expiryStatus = 'warning';
+            } else {
+                expiryStatus = 'good';
+            }
+        }
+        
+        const storageIcon = item.storage === 'refrigerated' ? '❄️' : '📦';
+        const categoryIcon = item.category === 'fresh produce' ? '🥬' : 
+                           item.category === 'dairy' ? '🥛' :
+                           item.category === 'meat/seafood' ? '🥩' :
+                           item.category === 'pantry staple' ? '🥫' : '📦';
+        
         return `
-            <div class="ingredient-item">
-                <div>
+            <div class="ingredient-item ${expiryStatus}">
+                <div class="ingredient-header">
+                    <div class="ingredient-name">
                     <strong>${item.name}</strong>
-                    <div class="ingredient-meta">
-                        ${addedDate ? `<span class='added-date'><i class='fas fa-calendar-plus'></i> Added: ${addedDate}</span>` : ''}
-                        ${expiry ? `<span class='expiry-date'><i class='fas fa-calendar-alt'></i> Expires: ${expiry}</span>` : ''}
-                        ${!expiry ? `<span class='no-expiry'><i class='fas fa-calendar-alt'></i> No expiry date set</span>` : ''}
+                        <span class="ingredient-category">${categoryIcon} ${item.category || 'ingredient'}</span>
+                    </div>
+                    <div class="storage-info">
+                        <span class="storage-badge">${storageIcon} ${item.storage || 'pantry'}</span>
                     </div>
                 </div>
+                    <div class="ingredient-meta">
+                        ${addedDate ? `<span class='added-date'><i class='fas fa-calendar-plus'></i> Added: ${addedDate}</span>` : ''}
+                    ${expiry ? `
+                        <span class='expiry-date ${expiryStatus}'>
+                            <i class='fas fa-calendar-alt'></i> 
+                            Expires: ${expiry}
+                            ${daysUntilExpiry !== null ? `(${daysUntilExpiry > 0 ? daysUntilExpiry + ' days left' : Math.abs(daysUntilExpiry) + ' days overdue'})` : ''}
+                        </span>
+                    ` : ''}
+                    ${item.estimatedDays ? `<span class='estimated-days'><i class='fas fa-clock'></i> Estimated: ${item.estimatedDays} days</span>` : ''}
+                    </div>
+                ${item.storageTips && item.storageTips.length > 0 ? `
+                    <div class="storage-tips">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>${item.storageTips[0]}</span>
+                </div>
+                ` : ''}
                 <div class="ingredient-actions">
                     <button class="edit-btn" title="Edit expiry date" onclick="editIngredientExpiry('${item.id}')">
                         <i class="fas fa-edit"></i>
@@ -1408,14 +1461,32 @@ function renderIngredients() {
 
 // Add ingredient
 function addIngredient(name, expiryDate) {
+    // If no expiry date provided, estimate it based on ingredient type
+    let estimatedExpiry = expiryDate;
+    if (!expiryDate) {
+        estimatedExpiry = expirationEstimator.estimateExpiration(name);
+    }
+    
+    const ingredientInfo = expirationEstimator.getIngredientInfo(name);
+    
     state.ingredients.push({
         id: Date.now().toString(),
         name,
-        expiryDate,
-        addedDate: new Date().toISOString()
+        expiryDate: estimatedExpiry,
+        addedDate: new Date().toISOString(),
+        category: ingredientInfo.category,
+        storage: ingredientInfo.storage,
+        estimatedDays: ingredientInfo.estimatedDays,
+        storageTips: ingredientInfo.tips
     });
     saveState();
     renderIngredients();
+    
+    // Show notification with storage info if expiry was estimated
+    if (!expiryDate) {
+        const storageIcon = ingredientInfo.storage === 'refrigerated' ? '❄️' : '📦';
+        showNotification(`${storageIcon} ${name} added with estimated expiry (${ingredientInfo.estimatedDays} days). Store ${ingredientInfo.storage}.`);
+    }
 }
 
 // Remove ingredient
@@ -1486,14 +1557,490 @@ function closeEditModal() {
     }
 }
 
+
+
 // Handle image upload
 function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Here you would typically send the image to a backend service
-    // for OCR processing. For now, we'll just show a message.
-    alert('Image scanning feature coming soon!');
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Image file is too large. Please select an image smaller than 5MB.');
+        return;
+    }
+
+    // Show scanning modal
+    showScanningModal(file);
+}
+
+// Show scanning modal with image preview and OCR processing
+function showScanningModal(file) {
+    const modal = document.createElement('div');
+    modal.className = 'scanning-modal';
+    modal.innerHTML = `
+        <div class="scanning-modal-content">
+            <div class="scanning-modal-header">
+                <h3>Scan Ingredient</h3>
+                <button class="close-btn" onclick="closeScanningModal()">&times;</button>
+            </div>
+            <div class="scanning-modal-body">
+                <div class="image-preview">
+                    <img id="preview-image" src="" alt="Ingredient image">
+                </div>
+                <div class="scanning-tips">
+                    <p><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> For best results, ensure text is clear and well-lit</p>
+                </div>
+                <div class="scanning-status">
+                    <div class="spinner"></div>
+                    <p>Analyzing image...</p>
+                </div>
+                <div class="scanning-results" style="display: none;">
+                    <div class="recognition-tabs">
+                        <button class="tab-btn active" onclick="switchTab('text')">Text Recognition</button>
+                        <button class="tab-btn" onclick="switchTab('visual')">Visual Recognition</button>
+                    </div>
+                    
+                    <div id="text-tab" class="tab-content active">
+                        <h4>Detected Text:</h4>
+                        <div id="detected-text" class="detected-text"></div>
+                    </div>
+                    
+                    <div id="visual-tab" class="tab-content">
+                        <h4>Visual Recognition:</h4>
+                        <div id="visual-results" class="visual-results"></div>
+                    </div>
+                    
+                    <h4>Suggested Ingredients:</h4>
+                    <div id="suggested-ingredients" class="suggested-ingredients"></div>
+                    <div class="manual-input">
+                        <input type="text" id="manual-ingredient" placeholder="Or type ingredient name manually...">
+                        <input type="date" id="manual-expiry" placeholder="Expiry date (optional)">
+                    </div>
+                    <div class="scanning-actions">
+                        <button class="btn-secondary" onclick="closeScanningModal()">Cancel</button>
+                        <button class="btn-primary" onclick="addScannedIngredient()">Add Ingredient</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Load and display image
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('preview-image').src = e.target.result;
+        
+        // Simulate OCR processing with a delay
+        setTimeout(() => {
+            processImageOCR(file);
+        }, 1500);
+    };
+    reader.readAsDataURL(file);
+}
+
+// Process image with OCR and visual recognition
+async function processImageOCR(file) {
+    try {
+        // Show processing status
+        const statusElement = document.querySelector('.scanning-status');
+        const resultsElement = document.querySelector('.scanning-results');
+        
+        statusElement.innerHTML = `
+            <div class="spinner"></div>
+            <p>Processing image with AI...</p>
+            <p class="processing-details">This may take a few seconds</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        `;
+
+        // Process both OCR and visual recognition simultaneously
+        const [ocrResult, visualResult] = await Promise.all([
+            performOCR(file, statusElement),
+            performVisualRecognition(file)
+        ]);
+
+        // Hide spinner and show results
+        statusElement.style.display = 'none';
+        resultsElement.style.display = 'block';
+
+        // Display OCR results
+        const cleanedText = cleanOCRText(ocrResult);
+        document.getElementById('detected-text').textContent = cleanedText || 'No text detected';
+
+        // Display visual recognition results
+        displayVisualResults(visualResult);
+
+        // Generate ingredient suggestions based on both OCR and visual recognition
+        const allSuggestions = generateCombinedSuggestions(cleanedText, visualResult);
+        renderIngredientSuggestions(allSuggestions);
+
+    } catch (error) {
+        console.error('Processing Error:', error);
+        
+        // Show error and fallback to manual input
+        statusElement.innerHTML = `
+            <div class="error-icon">⚠️</div>
+            <p>Processing failed</p>
+            <p class="processing-details">Please enter ingredient manually</p>
+        `;
+        
+        setTimeout(() => {
+            statusElement.style.display = 'none';
+            resultsElement.style.display = 'block';
+            document.getElementById('detected-text').textContent = 'Processing failed - manual input required';
+        }, 2000);
+    }
+}
+
+// Perform OCR processing
+async function performOCR(file, statusElement) {
+    try {
+        const result = await Tesseract.recognize(file, 'eng', {
+            logger: m => {
+                if (m.status === 'recognizing text') {
+                    const progressFill = document.getElementById('progress-fill');
+                    if (progressFill) {
+                        progressFill.style.width = `${Math.round(m.progress * 100)}%`;
+                    }
+                    statusElement.querySelector('p:last-of-type').textContent = `${Math.round(m.progress * 100)}% complete`;
+                }
+            }
+        });
+        return result.data.text.trim();
+    } catch (error) {
+        console.error('OCR Error:', error);
+        return '';
+    }
+}
+
+// Perform visual recognition using TensorFlow.js and MobileNet
+async function performVisualRecognition(file) {
+    try {
+        // Load MobileNet model
+        const model = await mobilenet.load();
+        
+        // Convert file to tensor
+        const img = await createImageBitmap(file);
+        const tensor = tf.browser.fromPixels(img);
+        const resized = tf.image.resizeBilinear(tensor, [224, 224]);
+        const expanded = resized.expandDims(0);
+        const normalized = expanded.div(255);
+        
+        // Get predictions
+        const predictions = await model.classify(normalized);
+        
+        // Clean up tensors
+        tensor.dispose();
+        resized.dispose();
+        expanded.dispose();
+        normalized.dispose();
+        
+        return predictions;
+    } catch (error) {
+        console.error('Visual Recognition Error:', error);
+        return [];
+    }
+}
+
+// Display visual recognition results
+function displayVisualResults(predictions) {
+    const container = document.getElementById('visual-results');
+    
+    if (!predictions || predictions.length === 0) {
+        container.innerHTML = '<div class="no-results">Visual recognition failed</div>';
+        return;
+    }
+    
+    // Filter for food-related predictions and format them
+    const foodPredictions = predictions
+        .filter(pred => pred.className.toLowerCase().includes('food') || 
+                       pred.className.toLowerCase().includes('fruit') ||
+                       pred.className.toLowerCase().includes('vegetable') ||
+                       pred.className.toLowerCase().includes('meat') ||
+                       pred.className.toLowerCase().includes('bread') ||
+                       pred.className.toLowerCase().includes('milk') ||
+                       pred.className.toLowerCase().includes('cheese') ||
+                       pred.className.toLowerCase().includes('apple') ||
+                       pred.className.toLowerCase().includes('banana') ||
+                       pred.className.toLowerCase().includes('tomato') ||
+                       pred.className.toLowerCase().includes('carrot'))
+        .slice(0, 5);
+    
+    if (foodPredictions.length === 0) {
+        container.innerHTML = '<div class="no-results">No food items detected</div>';
+        return;
+    }
+    
+    container.innerHTML = foodPredictions.map(pred => `
+        <div class="visual-prediction">
+            <div class="prediction-label">${formatPredictionLabel(pred.className)}</div>
+            <div class="prediction-confidence">${Math.round(pred.probability * 100)}% confidence</div>
+        </div>
+    `).join('');
+}
+
+// Format prediction labels for better readability
+function formatPredictionLabel(label) {
+    return label
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+// Generate combined suggestions from OCR and visual recognition
+function generateCombinedSuggestions(ocrText, visualPredictions) {
+    const suggestions = [];
+    
+    // Add OCR-based suggestions
+    if (ocrText && ocrText !== 'No text detected') {
+        const ocrSuggestions = generateIngredientSuggestions(ocrText);
+        suggestions.push(...ocrSuggestions.slice(0, 3));
+    }
+    
+    // Add visual recognition suggestions
+    if (visualPredictions && visualPredictions.length > 0) {
+        const visualSuggestions = generateVisualSuggestions(visualPredictions);
+        suggestions.push(...visualSuggestions.slice(0, 3));
+    }
+    
+    // Remove duplicates and take top suggestions
+    const uniqueSuggestions = [...new Set(suggestions)];
+    return uniqueSuggestions.slice(0, 6);
+}
+
+// Generate suggestions based on visual recognition
+function generateVisualSuggestions(predictions) {
+    const suggestions = [];
+    
+    // Map common visual predictions to ingredients
+    const visualToIngredient = {
+        'apple': 'Apple',
+        'banana': 'Banana',
+        'orange': 'Orange',
+        'tomato': 'Tomato',
+        'carrot': 'Carrot',
+        'lettuce': 'Lettuce',
+        'bread': 'Bread',
+        'milk': 'Milk',
+        'cheese': 'Cheese',
+        'chicken': 'Chicken',
+        'beef': 'Beef',
+        'fish': 'Fish',
+        'rice': 'Rice',
+        'pasta': 'Pasta',
+        'potato': 'Potato',
+        'onion': 'Onion',
+        'garlic': 'Garlic',
+        'pepper': 'Bell Pepper',
+        'cucumber': 'Cucumber',
+        'strawberry': 'Strawberry'
+    };
+    
+    predictions.forEach(pred => {
+        const label = pred.className.toLowerCase();
+        
+        // Check for exact matches
+        for (const [visual, ingredient] of Object.entries(visualToIngredient)) {
+            if (label.includes(visual)) {
+                suggestions.push(ingredient);
+                break;
+            }
+        }
+        
+        // Check for partial matches
+        if (label.includes('fruit')) suggestions.push('Fresh Fruit');
+        if (label.includes('vegetable')) suggestions.push('Fresh Vegetable');
+        if (label.includes('meat')) suggestions.push('Fresh Meat');
+        if (label.includes('dairy')) suggestions.push('Dairy Product');
+        if (label.includes('grain')) suggestions.push('Grain Product');
+    });
+    
+    return suggestions;
+}
+
+// Clean and process OCR text
+function cleanOCRText(text) {
+    if (!text) return '';
+    
+    // Remove common OCR artifacts and clean up text
+    return text
+        .replace(/\n+/g, ' ')           // Replace multiple newlines with spaces
+        .replace(/\s+/g, ' ')           // Replace multiple spaces with single space
+        .replace(/[^\w\s\-%]/g, ' ')    // Remove special characters except letters, numbers, spaces, hyphens, and %
+        .replace(/\b\d+\s*(?:g|kg|ml|l|oz|lb)\b/gi, '') // Remove measurements
+        .replace(/\b(?:organic|natural|fresh|pure|extra|virgin)\b/gi, '') // Remove common marketing words
+        .trim()
+        .split(' ')
+        .filter(word => word.length > 2) // Filter out very short words
+        .slice(0, 8)                     // Take first 8 meaningful words
+        .join(' ');
+}
+
+// Generate ingredient suggestions based on detected text
+function generateIngredientSuggestions(detectedText) {
+    const suggestions = [];
+    const text = detectedText.toLowerCase();
+    
+    if (!text || text === 'no text detected' || text === 'ocr failed - manual input required') {
+        return ['Fresh Produce', 'Pantry Item', 'Dairy Product', 'Meat Product'];
+    }
+    
+    // Check against our expiration estimator database
+    if (window.expirationEstimator && window.expirationEstimator.ingredients) {
+        const allIngredients = Object.keys(window.expirationEstimator.ingredients);
+        
+        // Score-based matching system
+        const scoredMatches = allIngredients.map(ingredient => {
+            const ingredientLower = ingredient.toLowerCase();
+            let score = 0;
+            
+            // Exact match gets highest score
+            if (ingredientLower === text) {
+                score = 100;
+            }
+            // Contains the full text
+            else if (ingredientLower.includes(text)) {
+                score = 80;
+            }
+            // Text contains the ingredient
+            else if (text.includes(ingredientLower)) {
+                score = 70;
+            }
+            // Word-by-word matching
+            else {
+                const textWords = text.split(' ').filter(word => word.length > 2);
+                const ingredientWords = ingredientLower.split(' ').filter(word => word.length > 2);
+                
+                // Count matching words
+                const matchingWords = textWords.filter(word => 
+                    ingredientWords.some(ingWord => 
+                        ingWord.includes(word) || word.includes(ingWord)
+                    )
+                );
+                
+                if (matchingWords.length > 0) {
+                    score = Math.min(60, matchingWords.length * 15);
+                }
+            }
+            
+            return { ingredient, score };
+        });
+        
+        // Filter out zero scores and sort by score
+        const validMatches = scoredMatches
+            .filter(match => match.score > 0)
+            .sort((a, b) => b.score - a.score);
+        
+        // Take top matches
+        suggestions.push(...validMatches.slice(0, 6).map(match => match.ingredient));
+    }
+    
+    // If no good matches found, try to extract meaningful words and suggest categories
+    if (suggestions.length === 0) {
+        const words = text.split(' ').filter(word => word.length > 2);
+        
+        // Common ingredient categories based on keywords
+        const categoryKeywords = {
+            'fruit': ['banana', 'apple', 'orange', 'grape', 'berry', 'peach', 'pear', 'mango'],
+            'vegetable': ['tomato', 'carrot', 'lettuce', 'spinach', 'broccoli', 'pepper', 'onion'],
+            'dairy': ['milk', 'cheese', 'yogurt', 'cream', 'butter', 'yoghurt'],
+            'meat': ['chicken', 'beef', 'pork', 'fish', 'salmon', 'turkey', 'lamb'],
+            'grain': ['bread', 'rice', 'pasta', 'flour', 'wheat', 'oat', 'quinoa'],
+            'pantry': ['oil', 'sauce', 'spice', 'herb', 'nut', 'bean', 'lentil']
+        };
+        
+        // Find matching categories
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+            if (keywords.some(keyword => words.some(word => word.includes(keyword)))) {
+                suggestions.push(`${category.charAt(0).toUpperCase() + category.slice(1)} Item`);
+            }
+        }
+        
+        // Add the original detected text as a fallback
+        if (suggestions.length === 0) {
+            suggestions.push(detectedText, 'Fresh Produce', 'Pantry Item');
+        }
+    }
+    
+    return suggestions;
+}
+
+// Render ingredient suggestions
+function renderIngredientSuggestions(suggestions) {
+    const container = document.getElementById('suggested-ingredients');
+    container.innerHTML = suggestions.map(ingredient => `
+        <div class="ingredient-suggestion" onclick="selectIngredientSuggestion('${ingredient}')">
+            <i class="fas fa-check-circle"></i>
+            <span>${ingredient}</span>
+        </div>
+    `).join('');
+}
+
+// Select ingredient suggestion
+function selectIngredientSuggestion(ingredient) {
+    document.getElementById('manual-ingredient').value = ingredient;
+    
+    // Update selected suggestion styling
+    document.querySelectorAll('.ingredient-suggestion').forEach(suggestion => {
+        suggestion.classList.remove('selected');
+        if (suggestion.querySelector('span').textContent === ingredient) {
+            suggestion.classList.add('selected');
+        }
+    });
+}
+
+// Add scanned ingredient to pantry
+function addScannedIngredient() {
+    const ingredientName = document.getElementById('manual-ingredient').value.trim();
+    const expiryDate = document.getElementById('manual-expiry').value;
+    
+    if (!ingredientName) {
+        alert('Please enter an ingredient name.');
+        return;
+    }
+    
+    // Add ingredient using existing function
+    addIngredient(ingredientName, expiryDate);
+    
+    // Close modal
+    closeScanningModal();
+    
+    // Reset file input
+    document.getElementById('scan-input').value = '';
+}
+
+// Switch between recognition tabs
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+}
+
+// Close scanning modal
+function closeScanningModal() {
+    const modal = document.querySelector('.scanning-modal');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 // Calculate maximum missing ingredients for slider

@@ -10,7 +10,7 @@
   <body>
     <header>
       <nav class="nav sage-header">
-        <h1 class="centered-title">MyCulinaire</h1>
+        <h1 class="centered-title" id="logo" onclick="showSection('home')" style="cursor: pointer;">MyCulinaire</h1>
       </nav>
     </header>
 
@@ -123,6 +123,12 @@
       </nav>
     </footer>
 
+    <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+    <script src="js/expiration-estimator.js?v=1.0"></script>
+    <script src="js/toolbar-scroll.js?v=1.0"></script>
+    <script src="js/pantry-scroll.js?v=1.0"></script>
     <script src="js/ai-features.js?v=1.5"></script>
     <script src="js/cooking-assistant.js?v=1.5"></script>
     <script src="js/app.js?v=1.5"></script>
