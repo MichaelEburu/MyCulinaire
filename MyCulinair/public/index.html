@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCulinaire - Your AI Cooking Companion</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  </head>
+  <body>
+    <header>
+      <nav class="nav sage-header">
+        <h1 class="centered-title" id="logo" onclick="showSection('home')" style="cursor: pointer;">MyCulinaire</h1>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Home Section -->
+      <section id="home-section">
+        <div class="search-section">
+          <h2>Find Ingredients to Buy</h2>
+          <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search for ingredients to buy...">
+            <button onclick="handleSearch()" class="btn-primary">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+
+        <div class="recommended-section">
+          <h2>Recommended for You</h2>
+          <div id="recipes-grid" class="recipes-grid">
+            <!-- Recipes will be loaded here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Pantry Section -->
+      <section id="pantry-section" style="display: none;">
+        <div class="pantry-section">
+          <h2>My Pantry</h2>
+          <form id="add-ingredient-form" class="add-form">
+            <input type="text" name="name" placeholder="Add ingredient..." required>
+            <input type="date" name="expiryDate">
+            <button type="submit" class="btn-primary">Add</button>
+          </form>
+          <div class="scan-container">
+            <input type="file" id="scan-input" accept="image/*" style="display: none;">
+            <button id="scan-button" class="btn-secondary">
+              <i class="fas fa-camera"></i> Scan Ingredient
+            </button>
+          </div>
+          <div id="ingredients-container" class="ingredients-list">
+            <!-- Ingredients will be loaded here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters Section -->
+      <section id="filters-section" style="display: none;">
+        <div class="filters-section">
+          <!-- Content will be rendered by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Favorites Section -->
+      <section id="favorites-section" style="display: none;">
+        <div class="favorites-section">
+          <h2>My Favorite Recipes</h2>
+          <div id="favorites-grid" class="recipes-grid">
+            <!-- Favorite recipes will be loaded here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Cart Section -->
+      <section id="cart-section" style="display: none;">
+        <div class="cart-section">
+          <h2>Shopping Cart</h2>
+          <div id="cart-items-container" class="cart-items">
+            <!-- Cart items will be loaded here -->
+          </div>
+          <div class="cart-summary">
+            <div class="cart-total">
+              <span>Total Items: <span id="cart-total-items">0</span></span>
+              <span>Estimated Total: <span id="cart-total-price">$0.00</span></span>
+            </div>
+            <div class="cart-actions">
+              <button onclick="clearCart()" class="btn-secondary">
+                <i class="fas fa-trash"></i> Clear Cart
+              </button>
+              <button onclick="checkout()" class="btn-primary">
+                <i class="fas fa-shopping-cart"></i> Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section id="settings-section" style="display: none;">
+        <div class="settings-section">
+          <h2>Settings</h2>
+          
+          <div class="setting-group">
+            <h3><i class="fas fa-user"></i> Profile</h3>
+            <div class="setting-item">
+              <label for="user-name">Name</label>
+              <input type="text" id="user-name" placeholder="Enter your name">
+            </div>
+            <div class="setting-item">
+              <label for="user-email">Email</label>
+              <input type="email" id="user-email" placeholder="Enter your email">
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3><i class="fas fa-cog"></i> Preferences</h3>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="dark-mode"> Enable Dark Mode
+              </label>
+            </div>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="notifications"> Enable Notifications
+              </label>
+            </div>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="auto-save"> Auto-save Pantry Changes
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+            <div class="setting-item">
+              <label for="ai-model">AI Model</label>
+              <select id="ai-model">
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
+                <option value="gpt-4">GPT-4 (Advanced)</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="ai-suggestions"> Enable AI Recipe Suggestions
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3><i class="fas fa-database"></i> Data Management</h3>
+            <div class="setting-actions">
+              <button onclick="exportData()" class="btn-secondary">
+                <i class="fas fa-download"></i> Export Data
+              </button>
+              <button onclick="importData()" class="btn-secondary">
+                <i class="fas fa-upload"></i> Import Data
+              </button>
+              <button onclick="clearAllData()" class="btn-secondary">
+                <i class="fas fa-trash"></i> Clear All Data
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3><i class="fas fa-info-circle"></i> About</h3>
+            <div class="about-info">
+              <p><strong>MyCulinaire</strong> v1.3.0</p>
+              <p>A modern AI-powered cooking assistant</p>
+              <p>Built with ❤️ for food lovers everywhere</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <nav class="footer-nav">
+        <a href="#" onclick="showSection('home')" class="footer-link">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="#" onclick="showSection('pantry')" class="footer-link">
+          <i class="fas fa-box"></i>
+          <span>Pantry</span>
+        </a>
+        <a href="#" onclick="showSection('cart')" class="footer-link">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Cart</span>
+        </a>
+        <a href="#" onclick="showSection('favorites')" class="footer-link">
+          <i class="fas fa-heart"></i>
+          <span>Favorites</span>
+        </a>
+        <a href="#" onclick="showSection('filters')" class="footer-link">
+          <i class="fas fa-sliders-h"></i>
+          <span>Filters</span>
+        </a>
+        <a href="#" onclick="showSection('settings')" class="footer-link">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </footer>
+
+    <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+    <script src="js/expiration-estimator.js?v=1.0"></script>
+    <script src="js/toolbar-scroll.js?v=1.0"></script>
+    <script src="js/pantry-scroll.js?v=1.0"></script>
+    <script src="js/ai-features.js?v=1.5"></script>
+    <script src="js/cooking-assistant.js?v=1.5"></script>
+    <script src="js/app.js?v=1.5"></script>
+  </body>
+</html> 

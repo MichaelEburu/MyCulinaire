@@ -1,0 +1,57 @@
+{
+  "name": "myculinaire",
+  "version": "1.3.0",
+  "description": "A modern AI-powered cooking assistant app with pantry management, recipe discovery, and smart shopping features",
+  "main": "server.js",
+  "keywords": [
+    "cooking",
+    "recipes",
+    "pantry",
+    "ai",
+    "assistant",
+    "food",
+    "meal-planning",
+    "shopping-list",
+    "ingredients"
+  ],
+  "author": "MyCulinaire Team",
+  "license": "MIT",
+  "homepage": "https://github.com/your-username/MyCulinaire",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/MyCulinaire.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/MyCulinaire/issues"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "server": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"No build process needed for this project\"",
+    "lint": "echo \"No linting configured\"",
+    "format": "echo \"No formatting configured\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "openai": "^4.20.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+} 
