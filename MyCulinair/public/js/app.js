@@ -26,16 +26,7 @@ const state = {
     },
     allergies: [],
     missingIngredientsFilter: 3, // Default: allow up to 3 missing ingredients
-    userLocation: null, // Store user location for grocery delivery
-    settings: {
-        userName: '',
-        userEmail: '',
-        darkMode: false,
-        notifications: true,
-        autoSave: true,
-        aiModel: 'gpt-3.5-turbo',
-        aiSuggestions: true
-    }
+    userLocation: null // Store user location for grocery delivery
 };
 
 // API Configuration
@@ -2937,6 +2928,36 @@ function renderRecipesToGrid(recipes, container) {
     `;
 }
 
+// Profile menu functionality
+function toggleProfileMenu() {
+    const dropdown = document.getElementById('profile-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// Close profile menu when clicking outside
+document.addEventListener('click', function(event) {
+    const profileMenu = document.querySelector('.profile-menu');
+    const dropdown = document.getElementById('profile-dropdown');
+    
+    if (profileMenu && !profileMenu.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Show profile section from dropdown
+function showProfileSection(section) {
+    // Close the dropdown
+    document.getElementById('profile-dropdown').classList.remove('show');
+    
+    // Show the favorites section (which contains the profile page)
+    showSection('favorites');
+    
+    // Switch to the specific profile tab
+    setTimeout(() => {
+        switchProfileTab(section);
+    }, 100);
+}
+
 // Update showSection to render profile page
 window.showSection = function(section) {
     const sections = ['home', 'pantry', 'cart', 'favorites', 'filters'];
@@ -2952,8 +2973,7 @@ window.showSection = function(section) {
         home: 0,
         pantry: 1,
         cart: 2,
-        favorites: 3,
-        filters: 4
+        filters: 3
     };
     const idx = navMap[section];
     if (typeof idx !== 'undefined') {
@@ -2966,6 +2986,8 @@ window.showSection = function(section) {
     if (section === 'filters') renderFiltersPage();
     if (section === 'cart') renderCartPage();
 };
+
+
 
 // Cart Functions
 function renderCartPage() {
@@ -3688,223 +3710,3 @@ function viewStoreMenu(storeName) {
         }, 1000);
     }
 }
-
-// Settings Functions
-function loadSettings() {
-    const savedSettings = localStorage.getItem('myculinaire-settings');
-    if (savedSettings) {
-        state.settings = { ...state.settings, ...JSON.parse(savedSettings) };
-    }
-    
-    // Update UI with current settings
-    updateSettingsUI();
-}
-
-function saveSettings() {
-    localStorage.setItem('myculinaire-settings', JSON.stringify(state.settings));
-    showNotification('Settings saved successfully!');
-}
-
-function updateSettingsUI() {
-    // Update form fields with current settings
-    const userNameInput = document.getElementById('user-name');
-    const userEmailInput = document.getElementById('user-email');
-    const darkModeCheckbox = document.getElementById('dark-mode');
-    const notificationsCheckbox = document.getElementById('notifications');
-    const autoSaveCheckbox = document.getElementById('auto-save');
-    const aiModelSelect = document.getElementById('ai-model');
-    const aiSuggestionsCheckbox = document.getElementById('ai-suggestions');
-    
-    if (userNameInput) userNameInput.value = state.settings.userName;
-    if (userEmailInput) userEmailInput.value = state.settings.userEmail;
-    if (darkModeCheckbox) darkModeCheckbox.checked = state.settings.darkMode;
-    if (notificationsCheckbox) notificationsCheckbox.checked = state.settings.notifications;
-    if (autoSaveCheckbox) autoSaveCheckbox.checked = state.settings.autoSave;
-    if (aiModelSelect) aiModelSelect.value = state.settings.aiModel;
-    if (aiSuggestionsCheckbox) aiSuggestionsCheckbox.checked = state.settings.aiSuggestions;
-    
-    // Apply dark mode if enabled
-    if (state.settings.darkMode) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-}
-
-function exportData() {
-    const data = {
-        ingredients: state.ingredients,
-        cartItems: state.cartItems,
-        dietaryFilters: state.dietaryFilters,
-        allergies: state.allergies,
-        settings: state.settings,
-        favorites: state.favorites || [],
-        exportDate: new Date().toISOString(),
-        version: '1.3.0'
-    };
-    
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `myculinaire-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    showNotification('Data exported successfully!');
-}
-
-function importData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    // Validate the data structure
-                    if (data.ingredients && data.settings) {
-                        // Import the data
-                        state.ingredients = data.ingredients || [];
-                        state.cartItems = data.cartItems || [];
-                        state.dietaryFilters = { ...state.dietaryFilters, ...data.dietaryFilters };
-                        state.allergies = data.allergies || [];
-                        state.settings = { ...state.settings, ...data.settings };
-                        
-                        if (data.favorites) {
-                            state.favorites = data.favorites;
-                        }
-                        
-                        // Save to localStorage
-                        saveState();
-                        saveSettings();
-                        
-                        // Update UI
-                        loadIngredients();
-                        loadCart();
-                        updateSettingsUI();
-                        
-                        showNotification('Data imported successfully!');
-                    } else {
-                        showNotification('Invalid data file format!', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error importing data:', error);
-                    showNotification('Error importing data file!', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-    };
-    input.click();
-}
-
-function clearAllData() {
-    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-        // Clear all data
-        state.ingredients = [];
-        state.cartItems = [];
-        state.allergies = [];
-        state.favorites = [];
-        
-        // Reset dietary filters
-        Object.keys(state.dietaryFilters).forEach(key => {
-            state.dietaryFilters[key] = false;
-        });
-        
-        // Reset settings to defaults
-        state.settings = {
-            userName: '',
-            userEmail: '',
-            darkMode: false,
-            notifications: true,
-            autoSave: true,
-            aiModel: 'gpt-3.5-turbo',
-            aiSuggestions: true
-        };
-        
-        // Clear localStorage
-        localStorage.removeItem('myculinaire-state');
-        localStorage.removeItem('myculinaire-settings');
-        
-        // Update UI
-        loadIngredients();
-        loadCart();
-        updateSettingsUI();
-        
-        showNotification('All data cleared successfully!');
-    }
-}
-
-// Settings event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Load settings when page loads
-    loadSettings();
-    
-    // Add event listeners for settings changes
-    const userNameInput = document.getElementById('user-name');
-    const userEmailInput = document.getElementById('user-email');
-    const darkModeCheckbox = document.getElementById('dark-mode');
-    const notificationsCheckbox = document.getElementById('notifications');
-    const autoSaveCheckbox = document.getElementById('auto-save');
-    const aiModelSelect = document.getElementById('ai-model');
-    const aiSuggestionsCheckbox = document.getElementById('ai-suggestions');
-    
-    if (userNameInput) {
-        userNameInput.addEventListener('input', function() {
-            state.settings.userName = this.value;
-            saveSettings();
-        });
-    }
-    
-    if (userEmailInput) {
-        userEmailInput.addEventListener('input', function() {
-            state.settings.userEmail = this.value;
-            saveSettings();
-        });
-    }
-    
-    if (darkModeCheckbox) {
-        darkModeCheckbox.addEventListener('change', function() {
-            state.settings.darkMode = this.checked;
-            saveSettings();
-            updateSettingsUI();
-        });
-    }
-    
-    if (notificationsCheckbox) {
-        notificationsCheckbox.addEventListener('change', function() {
-            state.settings.notifications = this.checked;
-            saveSettings();
-        });
-    }
-    
-    if (autoSaveCheckbox) {
-        autoSaveCheckbox.addEventListener('change', function() {
-            state.settings.autoSave = this.checked;
-            saveSettings();
-        });
-    }
-    
-    if (aiModelSelect) {
-        aiModelSelect.addEventListener('change', function() {
-            state.settings.aiModel = this.value;
-            saveSettings();
-        });
-    }
-    
-    if (aiSuggestionsCheckbox) {
-        aiSuggestionsCheckbox.addEventListener('change', function() {
-            state.settings.aiSuggestions = this.checked;
-            saveSettings();
-        });
-    }
-});

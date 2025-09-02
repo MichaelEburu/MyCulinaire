@@ -11,6 +11,41 @@
     <header>
       <nav class="nav sage-header">
         <h1 class="centered-title" id="logo" onclick="showSection('home')" style="cursor: pointer;">MyCulinaire</h1>
+        <div class="profile-menu">
+          <button class="profile-toggle" onclick="toggleProfileMenu()">
+            <i class="fas fa-user-circle"></i>
+            <span class="profile-text">Profile</span>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="profile-avatar-small">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <div class="profile-info-small">
+                <h3>My Profile</h3>
+                <p>Welcome back!</p>
+              </div>
+            </div>
+            <div class="profile-dropdown-content">
+              <a href="#" onclick="showProfileSection('favorites')" class="profile-link">
+                <i class="fas fa-star"></i>
+                <span>Favorites</span>
+              </a>
+              <a href="#" onclick="showProfileSection('friends')" class="profile-link">
+                <i class="fas fa-users"></i>
+                <span>Friends</span>
+              </a>
+              <a href="#" onclick="showProfileSection('upgrade')" class="profile-link">
+                <i class="fas fa-crown"></i>
+                <span>Upgrade</span>
+              </a>
+              <a href="#" onclick="showProfileSection('settings')" class="profile-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </a>
+            </div>
+          </div>
+        </div>
       </nav>
     </header>
 
@@ -97,83 +132,7 @@
         </div>
       </section>
 
-      <!-- Settings Section -->
-      <section id="settings-section" style="display: none;">
-        <div class="settings-section">
-          <h2>Settings</h2>
-          
-          <div class="setting-group">
-            <h3><i class="fas fa-user"></i> Profile</h3>
-            <div class="setting-item">
-              <label for="user-name">Name</label>
-              <input type="text" id="user-name" placeholder="Enter your name">
-            </div>
-            <div class="setting-item">
-              <label for="user-email">Email</label>
-              <input type="email" id="user-email" placeholder="Enter your email">
-            </div>
-          </div>
 
-          <div class="setting-group">
-            <h3><i class="fas fa-cog"></i> Preferences</h3>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="dark-mode"> Enable Dark Mode
-              </label>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="notifications"> Enable Notifications
-              </label>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="auto-save"> Auto-save Pantry Changes
-              </label>
-            </div>
-          </div>
-
-          <div class="setting-group">
-            <h3><i class="fas fa-robot"></i> AI Assistant</h3>
-            <div class="setting-item">
-              <label for="ai-model">AI Model</label>
-              <select id="ai-model">
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
-                <option value="gpt-4">GPT-4 (Advanced)</option>
-              </select>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="ai-suggestions"> Enable AI Recipe Suggestions
-              </label>
-            </div>
-          </div>
-
-          <div class="setting-group">
-            <h3><i class="fas fa-database"></i> Data Management</h3>
-            <div class="setting-actions">
-              <button onclick="exportData()" class="btn-secondary">
-                <i class="fas fa-download"></i> Export Data
-              </button>
-              <button onclick="importData()" class="btn-secondary">
-                <i class="fas fa-upload"></i> Import Data
-              </button>
-              <button onclick="clearAllData()" class="btn-secondary">
-                <i class="fas fa-trash"></i> Clear All Data
-              </button>
-            </div>
-          </div>
-
-          <div class="setting-group">
-            <h3><i class="fas fa-info-circle"></i> About</h3>
-            <div class="about-info">
-              <p><strong>MyCulinaire</strong> v1.3.0</p>
-              <p>A modern AI-powered cooking assistant</p>
-              <p>Built with ❤️ for food lovers everywhere</p>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer>
@@ -190,17 +149,10 @@
           <i class="fas fa-shopping-cart"></i>
           <span>Cart</span>
         </a>
-        <a href="#" onclick="showSection('favorites')" class="footer-link">
-          <i class="fas fa-heart"></i>
-          <span>Favorites</span>
-        </a>
+
         <a href="#" onclick="showSection('filters')" class="footer-link">
           <i class="fas fa-sliders-h"></i>
           <span>Filters</span>
-        </a>
-        <a href="#" onclick="showSection('settings')" class="footer-link">
-          <i class="fas fa-cog"></i>
-          <span>Settings</span>
         </a>
       </nav>
     </footer>

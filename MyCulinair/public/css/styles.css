@@ -20,6 +20,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 
 .nav h1 {
@@ -49,6 +50,124 @@ body {
 
 .nav-links a:hover {
     color: var(--accent);
+}
+
+/* Profile Menu */
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-toggle {
+    background: none;
+    border: none;
+    color: var(--cream-white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.profile-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.profile-toggle i {
+    font-size: 1.5rem;
+}
+
+.profile-text {
+    font-weight: 500;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--cream-white);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(141, 164, 126, 0.1);
+}
+
+.profile-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.profile-dropdown-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: var(--cream-white);
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-avatar-small {
+    font-size: 2.5rem;
+    color: var(--cream-white);
+}
+
+.profile-info-small h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.profile-info-small p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.profile-dropdown-content {
+    padding: 0.5rem 0;
+}
+
+.profile-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.profile-link:hover {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.profile-link i {
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+}
+
+.profile-link span {
+    font-weight: 500;
 }
 
 /* Main Content */
@@ -748,6 +867,8 @@ main {
     margin-right: 0.5rem;
 }
 
+
+
 /* Cooking Assistant Chat Styles */
 .cooking-assistant {
     background: var(--cream-white);
@@ -755,7 +876,7 @@ main {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     padding: 1.5rem;
     margin-top: 2rem;
-    max-width: 500px;
+    max-width: 600px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -829,6 +950,19 @@ main {
     
     .nav-links {
         display: none;
+    }
+    
+    .profile-text {
+        display: none;
+    }
+    
+    .profile-toggle {
+        padding: 0.5rem;
+    }
+    
+    .profile-dropdown {
+        min-width: 250px;
+        right: -1rem;
     }
     
     .search-container {
