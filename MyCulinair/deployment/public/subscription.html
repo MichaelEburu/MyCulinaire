@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCulinaire - Choose Your Plan</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .subscription-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #8da47e 0%, #a8c09a 50%, #c4d4b0 100%);
+            padding: 2rem;
+        }
+        
+        .subscription-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .subscription-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .subscription-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subscription-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+        }
+        
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .plan-card.featured {
+            border: 3px solid #8da47e;
+            transform: scale(1.05);
+        }
+        
+        .plan-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #8da47e;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #8da47e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-interval {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+        
+        .plan-features li {
+            padding: 0.5rem 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        
+        .plan-features li i {
+            color: #8da47e;
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+        
+        .subscribe-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #8da47e 0%, #a8c09a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(141, 164, 126, 0.4);
+        }
+        
+        .subscribe-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .back-to-app {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .back-to-app a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        
+        .back-to-app a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .plan-card.featured {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="subscription-page">
+        <div class="subscription-container">
+            <div class="subscription-header">
+                <h1>Choose Your Plan</h1>
+                <p>Most features are free! Upgrade for advanced AI and premium features</p>
+            </div>
+            
+            <div class="plans-grid" id="plans-container">
+                <!-- Plans will be loaded here -->
+            </div>
+            
+            <div class="back-to-app">
+                <a href="index.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to App
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Updated subscription plans - most features are free!
+        const plans = {
+            free: {
+                name: 'Free Plan',
+                price: 0,
+                interval: 'forever',
+                features: [
+                    'Unlimited recipe searches',
+                    'AI cooking assistant',
+                    'Pantry management',
+                    'Recipe favorites',
+                    'Shopping cart',
+                    'Basic notifications',
+                    'OCR ingredient scanning',
+                    'Dietary filters',
+                    'Allergen management',
+                    'Phone support'
+                ]
+            },
+            pro: {
+                name: 'Pro Plan',
+                price: 9,
+                interval: 'month',
+                features: [
+                    'Everything in Free',
+                    'Advanced dietary filters',
+                    'Export pantry data',
+                    'Advanced search filters',
+                    'Priority support',
+                    'Friends & sharing',
+                    'Advanced notifications',
+                    'Custom settings'
+                ]
+            },
+            premium: {
+                name: 'Premium Plan',
+                price: 19,
+                interval: 'month',
+                features: [
+                    'Everything in Pro',
+                    'Unlimited pantry items',
+                    'Advanced OCR features',
+                    'Early access to new features',
+                    'Priority AI responses',
+                    'Advanced analytics',
+                    'Data export/import',
+                    'API access'
+                ]
+            }
+        };
+
+        function renderPlans() {
+            const container = document.getElementById('plans-container');
+            
+            container.innerHTML = Object.entries(plans).map(([planId, plan]) => `
+                <div class="plan-card ${planId === 'pro' ? 'featured' : ''}">
+                    <div class="plan-name">${plan.name}</div>
+                    <div class="plan-price">${plan.price === 0 ? 'FREE' : `$${plan.price}`}</div>
+                    <div class="plan-interval">${plan.price === 0 ? 'forever' : `per ${plan.interval}`}</div>
+                    <ul class="plan-features">
+                        ${plan.features.map(feature => `<li><i class="fas fa-check"></i> ${feature}</li>`).join('')}
+                    </ul>
+                    <button class="subscribe-btn" onclick="subscribeToPlan('${planId}')">
+                        <i class="fas fa-${planId === 'free' ? 'check' : 'crown'}"></i>
+                        ${planId === 'free' ? 'Get Started' : planId === 'pro' ? 'Most Popular' : 'Subscribe'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function subscribeToPlan(planId) {
+            const button = document.querySelector(`[onclick="subscribeToPlan('${planId}')"]`);
+            const originalText = button.innerHTML;
+            
+            // Handle free plan
+            if (planId === 'free') {
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Started...';
+                
+                setTimeout(() => {
+                    alert('🎉 Welcome to MyCulinaire!\n\nYou now have access to all free features:\n• Unlimited recipe searches\n• AI cooking assistant\n• Pantry management\n• And much more!\n\nEnjoy cooking!');
+                    window.location.href = 'index.html';
+                }, 1500);
+                return;
+            }
+            
+            try {
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                
+                // Create checkout session
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        priceId: planId,
+                        mode: 'subscription'
+                    })
+                });
+                
+                const session = await response.json();
+                
+                if (session.url) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = session.url;
+                } else if (session.error) {
+                    // Handle Stripe not configured
+                    if (session.error === 'Stripe not configured') {
+                        showDemoMode(planId);
+                    } else {
+                        throw new Error(session.message || 'Failed to create checkout session');
+                    }
+                } else {
+                    throw new Error('Failed to create checkout session');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to start subscription. Please try again.');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        }
+
+        function showDemoMode(planId) {
+            const plan = plans[planId];
+            const confirmed = confirm(
+                `DEMO MODE\n\n` +
+                `You selected: ${plan.name} - $${plan.price}/${plan.interval}\n\n` +
+                `This is a demo. In production, this would redirect to Stripe checkout.\n\n` +
+                `To enable real payments:\n` +
+                `1. Get Stripe API keys from https://dashboard.stripe.com/\n` +
+                `2. Add them to your .env file\n` +
+                `3. Restart the server\n\n` +
+                `Continue with demo?`
+            );
+            
+            if (confirmed) {
+                // Simulate successful subscription
+                alert('Demo subscription successful! 🎉\n\nIn production, you would be redirected to Stripe checkout.');
+                // You could redirect to a success page here
+                // window.location.href = 'subscription-success.html';
+            }
+        }
+
+        // Initialize
+        renderPlans();
+    </script>
+</body>
+</html>

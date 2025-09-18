@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Redirect Demo - MyCulinaire</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8da47e 0%, #a8c09a 50%, #c4d4b0 100%);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .demo-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .demo-icon {
+            font-size: 4rem;
+            color: #8da47e;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+        
+        .demo-section h3 {
+            color: #8da47e;
+            margin-top: 0;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #8da47e 0%, #a8c09a 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-icon">🔄</div>
+        <h1>Stripe Redirect Demo</h1>
+        <p>This shows exactly how your subscription system redirects to Stripe checkout.</p>
+        
+        <div class="demo-section">
+            <h3>🎯 How It Works</h3>
+            <p>When a user clicks "Subscribe", your app:</p>
+            <ol>
+                <li>Sends a request to your server</li>
+                <li>Server creates a Stripe checkout session</li>
+                <li>Server returns a Stripe checkout URL</li>
+                <li>Browser redirects to Stripe's secure checkout page</li>
+                <li>User completes payment on Stripe</li>
+                <li>Stripe redirects back to your success page</li>
+            </ol>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🔧 Current Status</h3>
+            <div id="status" class="status info">
+                Testing connection to your server...
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>🧪 Test the Redirect</h3>
+            <p>Click the button below to test the subscription flow:</p>
+            <button class="btn" onclick="testSubscription()">
+                🚀 Test Stripe Redirect
+            </button>
+            <p><small>This will show you exactly what happens when someone subscribes.</small></p>
+        </div>
+        
+        <div class="demo-section">
+            <h3>📝 Code Example</h3>
+            <p>Here's the JavaScript that handles the redirect:</p>
+            <div class="code-block">
+// When user clicks subscribe
+const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId: 'starter' })
+});
+
+const session = await response.json();
+
+if (session.url) {
+    // This redirects to Stripe checkout
+    window.location.href = session.url;
+}
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <a href="subscription.html" class="btn">View Subscription Page</a>
+            <a href="index.html" class="btn">Back to App</a>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ priceId: 'starter' })
+                });
+                
+                const data = await response.json();
+                const statusDiv = document.getElementById('status');
+                
+                if (data.url) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ Stripe is configured! Ready to redirect to checkout.';
+                } else if (data.error === 'Stripe not configured') {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '⚠️ Stripe not configured. <a href="https://dashboard.stripe.com/" target="_blank">Get your API keys</a> and add them to .env file.';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ Error: ' + (data.message || 'Unknown error');
+                }
+            } catch (error) {
+                document.getElementById('status').className = 'status error';
+                document.getElementById('status').innerHTML = '❌ Server not responding. Make sure it\'s running on port 3001.';
+            }
+        }
+        
+        async function testSubscription() {
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ priceId: 'starter' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.url) {
+                    // This is the actual redirect that happens in production
+                    alert('Redirecting to Stripe checkout...\n\nIn production, you would be taken to:\n' + data.url);
+                    // Uncomment the next line to actually redirect
+                    // window.location.href = data.url;
+                } else if (data.error === 'Stripe not configured') {
+                    alert('DEMO MODE\n\nStripe is not configured yet.\n\nTo enable real redirects:\n1. Get API keys from https://dashboard.stripe.com/\n2. Add them to your .env file\n3. Restart the server');
+                } else {
+                    alert('Error: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error testing subscription: ' + error.message);
+            }
+        }
+        
+        // Check status on page load
+        checkStatus();
+    </script>
+</body>
+</html>

@@ -3,7 +3,6 @@ const state = {
     currentPage: 'home',
     ingredients: [],
     cartItems: [],
-    currentPantryCategory: 'fridge',
     dietaryFilters: {
         vegetarian: false,
         vegan: false,
@@ -208,8 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 pantry: 1,
                 cart: 2,
                 favorites: 3,
-                filters: 4,
-                'ai-assistant': 5
+                filters: 4
             };
             const idx = navMap[state.currentPage];
             if (typeof idx !== 'undefined') {
@@ -262,8 +260,7 @@ function initializeAppAfterLogin() {
         pantry: 1,
         cart: 2,
         favorites: 3,
-        filters: 4,
-        'ai-assistant': 5
+        filters: 4
     };
     const idx = navMap[state.currentPage];
     if (typeof idx !== 'undefined') {
@@ -388,29 +385,33 @@ async function renderCurrentPage() {
 
 // Render home page
 function renderHomePage() {
-    console.log('🔍 renderHomePage called');
-    // Don't override the existing HTML content, just load recipes
+    const container = document.getElementById('home-section');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="search-section">
+            <h2>Find Ingredients to Buy</h2>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search for ingredients to buy..." onkeypress="handleSearchKeyPress(event)">
+            </div>
+        </div>
+
+        <div class="recommended-section">
+            <h2>Recommended for You</h2>
+            <div id="recipes-grid" class="recipes-grid">
+                <!-- Recipes will be loaded here -->
+            </div>
+        </div>
+    `;
+
     // Load initial recipes
     loadInitialRecipes();
-    
-    // Update pantry stats
-    updatePantryStats();
 }
 
 // Handle Enter key press in search input
 function handleSearch() {
-    console.log('🔍 handleSearch called');
     const searchInput = document.getElementById('search-input');
-    const query = searchInput.value.trim();
-    
-    console.log('🔍 Search query:', query);
-    
-    if (!query) {
-        showNotification('Please enter a search term', 'error');
-        return;
-    }
-    
-    console.log('🔍 Searching for:', query);
+    const query = searchInput.value.trim().toLowerCase();
     
     // List of common ingredients that should show ingredient results first
     const ingredientKeywords = [
@@ -422,491 +423,16 @@ function handleSearch() {
         'vinegar', 'wine', 'beer', 'juice', 'water', 'tea', 'coffee'
     ];
     
-    // Search for ingredients to add to pantry
-    console.log('🔍 Searching for ingredients');
+    // Check if the search query is likely an ingredient
+    const isIngredientSearch = ingredientKeywords.some(keyword => 
+        query.includes(keyword) || keyword.includes(query)
+    );
     
-    // Store search history
-    storeSearchHistory(query);
-    
-    // Call searchIngredients to find ingredients to add to pantry
-    console.log('🔍 Calling searchIngredients');
-    searchIngredients();
-}
-
-// Store search history
-function storeSearchHistory(query) {
-    let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
-    if (!history.includes(query)) {
-        history.unshift(query);
-        history = history.slice(0, 10); // Keep only last 10 searches
-        localStorage.setItem('searchHistory', JSON.stringify(history));
-    }
-}
-
-// Update pantry stats on home page
-function updatePantryStats() {
-    const totalIngredients = state.ingredients.length;
-    const expiringSoon = state.ingredients.filter(ingredient => {
-        const expiryDate = new Date(ingredient.expiryDate);
-        const today = new Date();
-        const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
-        return daysUntilExpiry <= 3 && daysUntilExpiry >= 0;
-    }).length;
-    
-    // Calculate available recipes based on pantry ingredients
-    const availableRecipes = calculateAvailableRecipes();
-    
-    // Update the DOM
-    const totalIngredientsEl = document.getElementById('total-ingredients');
-    const expiringSoonEl = document.getElementById('expiring-soon');
-    const availableRecipesEl = document.getElementById('available-recipes');
-    
-    if (totalIngredientsEl) totalIngredientsEl.textContent = totalIngredients;
-    if (expiringSoonEl) expiringSoonEl.textContent = expiringSoon;
-    if (availableRecipesEl) availableRecipesEl.textContent = availableRecipes;
-}
-
-// Calculate available recipes based on pantry ingredients
-function calculateAvailableRecipes() {
-    if (state.ingredients.length === 0) return 0;
-    
-    // This is a simplified calculation - in a real app, you'd check against actual recipe ingredients
-    const pantryIngredientNames = state.ingredients.map(ing => ing.name.toLowerCase());
-    
-    // Count recipes that have at least 50% of ingredients available
-    let availableCount = 0;
-    if (lastRenderedRecipes && lastRenderedRecipes.length > 0) {
-        lastRenderedRecipes.forEach(recipe => {
-            if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
-                const recipeIngredients = recipe.ingredients.map(ing => ing.toLowerCase());
-                const availableIngredients = recipeIngredients.filter(ing => 
-                    pantryIngredientNames.some(pantryIng => 
-                        pantryIng.includes(ing) || ing.includes(pantryIng)
-                    )
-                );
-                
-                const availabilityPercentage = availableIngredients.length / recipeIngredients.length;
-                if (availabilityPercentage >= 0.5) {
-                    availableCount++;
-                }
-            }
-        });
-    }
-    
-    return availableCount;
-}
-
-// Multi-Category Pantry Functions
-function showPantryCategory(category) {
-    state.currentPantryCategory = category;
-    
-    // Update active category button
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-category="${category}"]`).classList.add('active');
-    
-    // Update category header
-    const categoryNames = {
-        'fridge': 'Fridge',
-        'pantry': 'Pantry', 
-        'freezer': 'Freezer',
-        'spices': 'Spices',
-        'beverages': 'Beverages'
-    };
-    
-    document.getElementById('current-category-title').textContent = categoryNames[category];
-    
-    // Update category stats
-    updateCategoryStats();
-    
-    // Re-render ingredients for this category
-    renderIngredients();
-}
-
-function updateCategoryStats() {
-    const categoryIngredients = getIngredientsByCategory(state.currentPantryCategory);
-    const total = categoryIngredients.length;
-    const expiring = categoryIngredients.filter(ingredient => {
-        const expiryDate = new Date(ingredient.expiryDate);
-        const today = new Date();
-        const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
-        return daysUntilExpiry <= 3 && daysUntilExpiry >= 0;
-    }).length;
-    
-    document.getElementById('category-total').textContent = `${total} items`;
-    document.getElementById('category-expiring').textContent = `${expiring} expiring soon`;
-}
-
-function getIngredientsByCategory(category) {
-    const categoryMap = {
-        'fridge': ['dairy', 'meat', 'vegetables', 'fruits', 'beverages'],
-        'pantry': ['grains', 'canned', 'dry goods', 'spices'],
-        'freezer': ['frozen', 'ice cream', 'frozen vegetables'],
-        'spices': ['spices', 'herbs', 'seasonings'],
-        'beverages': ['beverages', 'drinks', 'juices', 'sodas']
-    };
-    
-    const categories = categoryMap[category] || [];
-    return state.ingredients.filter(ingredient => {
-        const ingredientCategory = ingredient.category ? ingredient.category.toLowerCase() : '';
-        const storage = ingredient.storage ? ingredient.storage.toLowerCase() : '';
-        
-        // Check if ingredient matches category or storage type
-        return categories.some(cat => 
-            ingredientCategory.includes(cat) || 
-            storage.includes(cat) ||
-            (category === 'fridge' && storage === 'refrigerated') ||
-            (category === 'freezer' && storage === 'frozen') ||
-            (category === 'pantry' && (storage === 'pantry' || storage === 'room temperature'))
-        );
-    });
-}
-
-function updateCategoryCounts() {
-    const categories = ['fridge', 'pantry', 'freezer', 'spices', 'beverages'];
-    
-    categories.forEach(category => {
-        const count = getIngredientsByCategory(category).length;
-        const countElement = document.getElementById(`${category}-count`);
-        if (countElement) {
-            countElement.textContent = count;
-        }
-    });
-}
-
-// Handle add ingredient form submission
-function handleAddIngredient(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const name = formData.get('name').trim();
-    const expiryDate = formData.get('expiryDate');
-    
-    if (!name) {
-        showNotification('Please enter an ingredient name', 'error');
-        return;
-    }
-    
-    // Add the ingredient
-    addIngredient(name, expiryDate);
-    
-    // Clear the form
-    event.target.reset();
-    
-    showNotification(`${name} added to pantry!`, 'success');
-}
-
-// Barcode scanning functionality
-function startBarcodeScan() {
-    // Check if camera is available
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showNotification('Camera not available on this device', 'error');
-        return;
-    }
-    
-    // Create full-screen barcode scanner like visual guide
-    const modal = document.createElement('div');
-    modal.className = 'barcode-modal';
-    modal.innerHTML = `
-        <div class="barcode-scanner-container">
-            <div class="barcode-scanner">
-                <div id="barcode-scanner"></div>
-                <div class="barcode-overlay">
-                    <div class="barcode-corners">
-                        <div class="corner top-left"></div>
-                        <div class="corner top-right"></div>
-                        <div class="corner bottom-left"></div>
-                        <div class="corner bottom-right"></div>
-                    </div>
-                    <div class="barcode-line"></div>
-                    <div class="barcode-instructions">
-                        <h3>Scan Barcode</h3>
-                        <p>Center the barcode within the frame</p>
-                    </div>
-                </div>
-                <div id="barcode-loading" class="barcode-loading" style="display: none;">
-                    <div class="loading-spinner"></div>
-                    <p>Looking up product...</p>
-                </div>
-            </div>
-            <div class="barcode-controls">
-                <button class="flashlight-btn" onclick="toggleFlashlight()" id="flashlight-btn">
-                    <i class="fas fa-flashlight"></i>
-                </button>
-                <button class="close-barcode" onclick="closeBarcodeScan()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Initialize Quagga with proper camera setup
-    Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector('#barcode-scanner'),
-            constraints: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: "environment" // Use back camera
-            },
-            area: { // Define scanning area to match the corner overlay
-                top: "25%",
-                right: "25%",
-                left: "25%",
-                bottom: "25%"
-            }
-        },
-        decoder: {
-            readers: [
-                "code_128_reader",
-                "ean_reader",
-                "ean_8_reader",
-                "code_39_reader",
-                "code_39_vin_reader",
-                "codabar_reader",
-                "upc_reader",
-                "upc_e_reader",
-                "i2of5_reader"
-            ]
-        },
-        locate: true,
-        locator: {
-            patchSize: "medium",
-            halfSample: true
-        },
-        numOfWorkers: 2
-    }, function(err) {
-        if (err) {
-            console.error('Quagga initialization error:', err);
-            showNotification('Failed to initialize barcode scanner. Please allow camera access.', 'error');
-            closeBarcodeScan();
-            return;
-        }
-        console.log("Quagga initialization finished. Ready to start");
-        Quagga.start();
-        
-        // Camera is ready for scanning
-        console.log("Barcode scanner started successfully");
-    });
-    
-    // Handle successful barcode detection
-    Quagga.onDetected(function(data) {
-        const code = data.codeResult.code;
-        console.log('Barcode detected:', code);
-        
-        // Hide scanning frame and show loading indicator
-        const loadingEl = document.getElementById('barcode-loading');
-        const scanningFrame = document.querySelector('.barcode-corners');
-        if (loadingEl) loadingEl.style.display = 'flex';
-        if (scanningFrame) scanningFrame.style.display = 'none';
-        
-        // Stop scanning
-        Quagga.stop();
-        
-        // Look up product information by barcode
-        lookupProductByBarcode(code);
-    });
-}
-
-
-function closeBarcodeScan() {
-    // Stop Quagga if it's running
-    if (Quagga) {
-        Quagga.stop();
-    }
-    
-    // Turn off flashlight if it's on
-    if (window.flashlightStream) {
-        window.flashlightStream.getTracks().forEach(track => track.stop());
-        window.flashlightStream = null;
-    }
-    
-    // Remove modal
-    const modal = document.querySelector('.barcode-modal');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-function toggleFlashlight() {
-    const flashlightBtn = document.getElementById('flashlight-btn');
-    const icon = flashlightBtn.querySelector('i');
-    
-    if (window.flashlightStream) {
-        // Turn off flashlight
-        window.flashlightStream.getTracks().forEach(track => track.stop());
-        window.flashlightStream = null;
-        icon.className = 'fas fa-flashlight';
-        flashlightBtn.classList.remove('active');
+    if (isIngredientSearch) {
+        searchIngredients();
     } else {
-        // Turn on flashlight
-        navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'environment',
-                torch: true
-            }
-        }).then(stream => {
-            window.flashlightStream = stream;
-            icon.className = 'fas fa-flashlight';
-            flashlightBtn.classList.add('active');
-        }).catch(err => {
-            console.log('Flashlight not supported:', err);
-            showNotification('Flashlight not supported on this device', 'warning');
-        });
+        searchRecipes();
     }
-}
-
-async function lookupProductByBarcode(barcode) {
-    showNotification('Looking up product...', 'info');
-    
-    try {
-        // Use Open Food Facts API to get real product data
-        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-        const data = await response.json();
-        
-        if (data.status === 1 && data.product) {
-            const product = data.product;
-            
-            // Extract product information
-            const productName = product.product_name || product.product_name_en || `Product ${barcode}`;
-            const brand = product.brands ? product.brands.split(',')[0].trim() : '';
-            const fullName = brand ? `${brand} ${productName}` : productName;
-            
-            // Determine category and storage based on product data
-            const categories = product.categories_tags || [];
-            const category = determineProductCategory(categories, productName);
-            const storage = determineStorageType(category, productName);
-            
-            // Add the product to pantry
-            addIngredient(fullName, null, category, storage);
-            
-            showNotification(`${fullName} added from barcode!`, 'success');
-            
-            // Close the modal after a short delay
-            setTimeout(() => {
-                closeBarcodeScan();
-            }, 1000);
-        } else {
-            // If product not found, try UPC Database as fallback
-            await tryUPCDatabase(barcode);
-        }
-    } catch (error) {
-        console.error('Error looking up product:', error);
-        showNotification('Product not found. Adding as generic item.', 'warning');
-        
-        // Add as generic product
-        addIngredient(`Product ${barcode}`, null, 'pantry', 'pantry');
-        
-        // Close the modal after a short delay
-        setTimeout(() => {
-            closeBarcodeScan();
-        }, 1000);
-    }
-}
-
-async function tryUPCDatabase(barcode) {
-    try {
-        // Try UPC Database as fallback
-        const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
-        const data = await response.json();
-        
-        if (data.items && data.items.length > 0) {
-            const item = data.items[0];
-            const productName = item.title || `Product ${barcode}`;
-            const category = determineProductCategory([], productName);
-            const storage = determineStorageType(category, productName);
-            
-            addIngredient(productName, null, category, storage);
-            showNotification(`${productName} added from barcode!`, 'success');
-            
-            // Close the modal after a short delay
-            setTimeout(() => {
-                closeBarcodeScan();
-            }, 1000);
-        } else {
-            throw new Error('Product not found in any database');
-        }
-    } catch (error) {
-        console.error('UPC Database lookup failed:', error);
-        showNotification('Product not found. Adding as generic item.', 'warning');
-        addIngredient(`Product ${barcode}`, null, 'pantry', 'pantry');
-    }
-}
-
-function determineProductCategory(categories, productName) {
-    const name = productName.toLowerCase();
-    const categoryTags = categories.join(' ').toLowerCase();
-    
-    // Check for specific food categories
-    if (name.includes('milk') || name.includes('cheese') || name.includes('yogurt') || 
-        name.includes('butter') || name.includes('cream') || categoryTags.includes('dairy')) {
-        return 'dairy';
-    }
-    
-    if (name.includes('chicken') || name.includes('beef') || name.includes('pork') || 
-        name.includes('fish') || name.includes('meat') || categoryTags.includes('meat')) {
-        return 'meat';
-    }
-    
-    if (name.includes('apple') || name.includes('banana') || name.includes('orange') || 
-        name.includes('fruit') || categoryTags.includes('fruits')) {
-        return 'fruits';
-    }
-    
-    if (name.includes('carrot') || name.includes('tomato') || name.includes('lettuce') || 
-        name.includes('vegetable') || categoryTags.includes('vegetables')) {
-        return 'vegetables';
-    }
-    
-    if (name.includes('rice') || name.includes('pasta') || name.includes('bread') || 
-        name.includes('cereal') || name.includes('grain') || categoryTags.includes('grains')) {
-        return 'grains';
-    }
-    
-    if (name.includes('spice') || name.includes('herb') || name.includes('seasoning') || 
-        name.includes('salt') || name.includes('pepper') || categoryTags.includes('spices')) {
-        return 'spices';
-    }
-    
-    if (name.includes('juice') || name.includes('soda') || name.includes('water') || 
-        name.includes('drink') || name.includes('beverage') || categoryTags.includes('beverages')) {
-        return 'beverages';
-    }
-    
-    if (name.includes('frozen') || name.includes('ice cream') || categoryTags.includes('frozen')) {
-        return 'frozen';
-    }
-    
-    // Default to pantry for packaged goods
-    return 'pantry';
-}
-
-function determineStorageType(category, productName) {
-    const name = productName.toLowerCase();
-    
-    // Frozen items
-    if (category === 'frozen' || name.includes('frozen') || name.includes('ice cream')) {
-        return 'frozen';
-    }
-    
-    // Refrigerated items
-    if (category === 'dairy' || category === 'meat' || category === 'fruits' || category === 'vegetables') {
-        return 'refrigerated';
-    }
-    
-    // Some specific items that need refrigeration
-    if (name.includes('milk') || name.includes('cheese') || name.includes('yogurt') || 
-        name.includes('butter') || name.includes('cream') || name.includes('eggs')) {
-        return 'refrigerated';
-    }
-    
-    // Default to pantry storage
-    return 'pantry';
 }
 
 function handleSearchKeyPress(event) {
@@ -917,7 +443,6 @@ function handleSearchKeyPress(event) {
 
 // Load initial recipes (use pantry if available)
 async function loadInitialRecipes() {
-    console.log('🔍 loadInitialRecipes called');
     try {
         if (state.ingredients.length > 0) {
             // Try multiple search strategies to find recipes using pantry ingredients
@@ -1092,12 +617,9 @@ async function loadInitialRecipes() {
 
 // Search recipes (combine search term and pantry)
 async function searchRecipes() {
-    console.log('🔍 searchRecipes called');
     const searchInput = document.getElementById('search-input');
     const query = searchInput.value.trim();
     let recipes = [];
-    
-    console.log('🔍 searchRecipes query:', query);
     
     try {
         if (state.ingredients.length > 0) {
@@ -1273,7 +795,6 @@ async function searchRecipes() {
         }
         
         // Limit to 12 recipes and render
-        console.log('🔍 searchRecipes found recipes:', recipes.length);
         renderRecipes(recipes.slice(0, 12));
     } catch (error) {
         console.error('Error searching recipes:', error);
@@ -1500,9 +1021,6 @@ async function searchIngredients() {
                                                 <span><i class="fas fa-utensils"></i> ${recipe.strCategory}</span>
                                                 <span><i class="fas fa-globe"></i> ${recipe.strArea}</span>
                                             </div>
-                                            <button class="visual-guide-btn-small" onclick="event.stopPropagation(); visualGuidance.showVisualGuidance(${JSON.stringify(recipe).replace(/"/g, '&quot;')})">
-                                                <i class="fas fa-eye"></i> Visual Guide
-                                            </button>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -1546,14 +1064,9 @@ async function searchIngredients() {
 
 // Render recipes
 function renderRecipes(recipes) {
-    console.log('🔍 renderRecipes called with:', recipes.length, 'recipes');
     lastRenderedRecipes = recipes;
     const grid = document.getElementById('recipes-grid');
-    if (!grid) {
-        console.log('🔍 recipes-grid element not found!');
-        return;
-    }
-    console.log('🔍 recipes-grid found, rendering...');
+    if (!grid) return;
 
     if (!recipes || recipes.length === 0) {
         const searchInput = document.getElementById('search-input');
@@ -1675,9 +1188,6 @@ function renderRecipes(recipes) {
                             <span class="preview-cooktime"><i class='fas fa-clock'></i> ${cookTime}</span>
                             <span class="preview-missing"><i class='fas fa-exclamation-triangle'></i> Missing: ${missing.length}</span>
                         </div>
-                        <button class="visual-guide-btn-small" onclick="event.stopPropagation(); visualGuidance.showVisualGuidance(${JSON.stringify(recipe).replace(/"/g, '&quot;')})">
-                            <i class="fas fa-eye"></i> Visual Guide
-                        </button>
                         <div class="favorite-star" onclick="event.stopPropagation(); toggleFavorite('${recipe.idMeal}')">
                             <i class="fas fa-star${fav ? '' : '-o'}" style="color:${fav ? '#FFD700' : '#ccc'}"></i>
                         </div>
@@ -1900,16 +1410,31 @@ function renderPantryPage() {
     const container = document.getElementById('pantry-section');
     if (!container) return;
     
-    // The HTML is now in the index.html file, so we just need to initialize
+    container.innerHTML = `
+        <div class="pantry-section">
+            <h2>My Pantry</h2>
+            <form id="add-ingredient-form" class="add-form">
+                <input type="text" name="name" placeholder="Add ingredient..." required>
+                <input type="date" name="expiryDate">
+                <button type="submit" class="btn-primary">Add</button>
+            </form>
+            <div class="scan-container">
+                <input type="file" id="scan-input" accept="image/*" style="display: none;">
+                <button id="scan-button" class="btn-secondary">
+                    <i class="fas fa-camera"></i> Scan Ingredient
+                </button>
+                <button onclick="startBarcodeScan()" class="btn-secondary">
+                    <i class="fas fa-barcode"></i> Scan Barcode
+                </button>
+            </div>
+
+            <div id="ingredients-container" class="ingredients-list">
+                <!-- Ingredients will be loaded here -->
+            </div>
+        </div>
+    `;
+
     renderIngredients();
-    updateCategoryCounts(); // Initialize category counts
-    updateCategoryStats(); // Initialize category stats
-    
-    // Add event listener for the add ingredient form
-    const addForm = document.getElementById('add-ingredient-form');
-    if (addForm) {
-        addForm.addEventListener('submit', handleAddIngredient);
-    }
 }
 
 // Render ingredients
@@ -1917,28 +1442,17 @@ function renderIngredients() {
     const container = document.getElementById('ingredients-container');
     if (!container) return;
 
-    // Get ingredients for current category
-    const categoryIngredients = getIngredientsByCategory(state.currentPantryCategory);
-    
-    if (categoryIngredients.length === 0) {
-        const categoryNames = {
-            'fridge': 'Fridge',
-            'pantry': 'Pantry', 
-            'freezer': 'Freezer',
-            'spices': 'Spices',
-            'beverages': 'Beverages'
-        };
-        
+    if (state.ingredients.length === 0) {
         container.innerHTML = `
             <div class="no-items">
                 <i class="fas fa-box-open"></i>
-                <p>Your ${categoryNames[state.currentPantryCategory]} is empty. Add some ingredients!</p>
+                <p>Your pantry is empty. Add some ingredients!</p>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = categoryIngredients.map(item => {
+    container.innerHTML = state.ingredients.map(item => {
         const addedDate = item.addedDate ? new Date(item.addedDate).toLocaleDateString() : '';
         const expiry = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '';
         
@@ -2010,7 +1524,7 @@ function renderIngredients() {
 }
 
 // Add ingredient
-function addIngredient(name, expiryDate, category = null, storage = null) {
+function addIngredient(name, expiryDate) {
     // If no expiry date provided, estimate it based on ingredient type
     let estimatedExpiry = expiryDate;
     if (!expiryDate) {
@@ -2019,24 +1533,18 @@ function addIngredient(name, expiryDate, category = null, storage = null) {
     
     const ingredientInfo = expirationEstimator.getIngredientInfo(name);
     
-    // Use provided category and storage, or fall back to estimated values
-    const finalCategory = category || ingredientInfo.category;
-    const finalStorage = storage || ingredientInfo.storage;
-    
     state.ingredients.push({
         id: Date.now().toString(),
         name,
         expiryDate: estimatedExpiry,
         addedDate: new Date().toISOString(),
-        category: finalCategory,
-        storage: finalStorage,
+        category: ingredientInfo.category,
+        storage: ingredientInfo.storage,
         estimatedDays: ingredientInfo.estimatedDays,
         storageTips: ingredientInfo.tips
     });
     saveState();
     renderIngredients();
-    updatePantryStats(); // Update stats when ingredient is added
-    updateCategoryCounts(); // Update category counts
     
     // Show notification with storage info if expiry was estimated
     if (!expiryDate) {
@@ -2050,8 +1558,6 @@ function removeIngredient(id) {
     state.ingredients = state.ingredients.filter(item => item.id !== id);
     saveState();
     renderIngredients();
-    updatePantryStats(); // Update stats when ingredient is removed
-    updateCategoryCounts(); // Update category counts
 }
 
 // Edit ingredient expiry date
@@ -2446,477 +1952,6 @@ function getDefaultExpiryDate() {
     const date = new Date();
     date.setDate(date.getDate() + 7); // Default to 1 week from now
     return date.toISOString().split('T')[0];
-}
-
-// Pantry scanning functionality - scan entire pantry at once
-function startPantryScan() {
-    // Check if device supports camera
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Camera not supported on this device');
-        return;
-    }
-
-    // Create pantry scanner modal
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content pantry-scanner-modal">
-            <div class="scanner-header">
-                <h2>Scan Your Pantry</h2>
-                <button onclick="closePantryScanner()" class="close-btn">&times;</button>
-            </div>
-            <div class="pantry-instructions">
-                <p><strong>Instructions:</strong></p>
-                <ul>
-                    <li>Point your camera at your pantry shelves</li>
-                    <li>Move slowly to capture all items</li>
-                    <li>Make sure barcodes and labels are visible</li>
-                    <li>Tap "Capture" when you've scanned everything</li>
-                </ul>
-            </div>
-            <div class="pantry-scanner-container">
-                <video id="pantry-video" autoplay playsinline></video>
-                <canvas id="pantry-canvas" style="display: none;"></canvas>
-                <div class="pantry-overlay">
-                    <div class="scanning-indicator">
-                        <div class="scanning-dot"></div>
-                        <p>Scanning pantry...</p>
-                    </div>
-                </div>
-            </div>
-            <div class="pantry-controls">
-                <button onclick="closePantryScanner()" class="btn-secondary">Cancel</button>
-                <button onclick="capturePantryImage()" class="btn-primary" id="capture-btn">
-                    <i class="fas fa-camera"></i> Capture
-                </button>
-                <button onclick="toggleFlashlight()" class="btn-secondary" id="flashlight-btn">💡 Flashlight</button>
-            </div>
-            <div id="detected-items" class="detected-items" style="display: none;">
-                <h3>Detected Items:</h3>
-                <div id="items-list"></div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Start camera
-    navigator.mediaDevices.getUserMedia({ 
-        video: { 
-            facingMode: 'environment',
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-        } 
-    })
-    .then(stream => {
-        const video = document.getElementById('pantry-video');
-        video.srcObject = stream;
-        
-        // Start continuous scanning
-        startPantryDetection();
-    })
-    .catch(err => {
-        console.error('Camera access denied:', err);
-        alert('Camera access is required for pantry scanning');
-        closePantryScanner();
-    });
-}
-
-function startPantryDetection() {
-    const video = document.getElementById('pantry-video');
-    const canvas = document.getElementById('pantry-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size to match video
-    video.addEventListener('loadedmetadata', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-    });
-    
-    // Start continuous barcode detection
-    if (typeof Quagga !== 'undefined') {
-        // Use mobile-optimized config if available
-        const config = window.quaggaConfig || {
-            inputStream: {
-                name: "Live",
-                type: "LiveStream",
-                target: video,
-                constraints: {
-                    width: 1280,
-                    height: 720,
-                    facingMode: "environment"
-                }
-            },
-            decoder: {
-                readers: [
-                    "code_128_reader",
-                    "ean_reader",
-                    "ean_8_reader",
-                    "code_39_reader",
-                    "upc_reader",
-                    "upc_e_reader"
-                ]
-            },
-            locate: true,
-            locator: {
-                patchSize: "large",
-                halfSample: true
-            }
-        };
-        
-        // Override target for this specific instance
-        config.inputStream.target = video;
-        
-        Quagga.init(config, (err) => {
-            if (err) {
-                console.error('Quagga initialization error:', err);
-                showNotification('Barcode detection not available. You can still capture images manually.', 'warning');
-                return;
-            }
-            Quagga.start();
-        });
-        
-        // Store detected barcodes
-        window.detectedBarcodes = new Set();
-        
-        Quagga.onDetected((result) => {
-            const barcode = result.codeResult.code;
-            if (!window.detectedBarcodes.has(barcode)) {
-                window.detectedBarcodes.add(barcode);
-                console.log('New barcode detected:', barcode);
-                showNotification(`Found barcode: ${barcode}`, 'success');
-            }
-        });
-    }
-}
-
-function capturePantryImage() {
-    const video = document.getElementById('pantry-video');
-    const canvas = document.getElementById('pantry-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Draw video frame to canvas
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Stop camera
-    if (video.srcObject) {
-        const tracks = video.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-    }
-    
-    // Stop Quagga
-    if (typeof Quagga !== 'undefined' && Quagga.stop) {
-        Quagga.stop();
-    }
-    
-    // Process detected items
-    processPantryScan();
-}
-
-async function processPantryScan() {
-    const detectedItems = Array.from(window.detectedBarcodes || []);
-    
-    if (detectedItems.length === 0) {
-        showNotification('No barcodes detected. Try scanning items more clearly.', 'warning');
-        closePantryScanner();
-        return;
-    }
-    
-    // Show detected items
-    const itemsList = document.getElementById('items-list');
-    const detectedSection = document.getElementById('detected-items');
-    
-    itemsList.innerHTML = '<div class="loading">Looking up products...</div>';
-    detectedSection.style.display = 'block';
-    
-    const products = [];
-    
-    // Look up each barcode
-    for (const barcode of detectedItems) {
-        try {
-            const productInfo = await lookupProductByBarcode(barcode);
-            if (productInfo) {
-                products.push({
-                    ...productInfo,
-                    barcode: barcode,
-                    selected: true
-                });
-            } else {
-                products.push({
-                    name: `Unknown Product (${barcode})`,
-                    brand: '',
-                    barcode: barcode,
-                    selected: true
-                });
-            }
-        } catch (error) {
-            console.error('Error looking up barcode:', barcode, error);
-            products.push({
-                name: `Unknown Product (${barcode})`,
-                brand: '',
-                barcode: barcode,
-                selected: true
-            });
-        }
-    }
-    
-    // Display products for selection
-    displayPantryProducts(products);
-}
-
-function displayPantryProducts(products) {
-    const itemsList = document.getElementById('items-list');
-    
-    itemsList.innerHTML = products.map((product, index) => `
-        <div class="product-item ${product.selected ? 'selected' : ''}" data-index="${index}">
-            <div class="product-checkbox">
-                <input type="checkbox" ${product.selected ? 'checked' : ''} 
-                       onchange="toggleProductSelection(${index})">
-            </div>
-            <div class="product-info">
-                ${product.image ? `<img src="${product.image}" alt="${product.name}" class="product-thumb">` : ''}
-                <div class="product-details">
-                    <h4>${product.name}</h4>
-                    ${product.brand ? `<p class="brand">${product.brand}</p>` : ''}
-                    <p class="barcode">Barcode: ${product.barcode}</p>
-                </div>
-            </div>
-            <div class="expiry-input">
-                <label>Expiry:</label>
-                <input type="date" id="expiry-${index}" value="${getDefaultExpiryDate()}">
-            </div>
-        </div>
-    `).join('');
-    
-    // Add action buttons
-    const actionButtons = document.createElement('div');
-    actionButtons.className = 'pantry-actions';
-    actionButtons.innerHTML = `
-        <button onclick="selectAllProducts()" class="btn-secondary">Select All</button>
-        <button onclick="deselectAllProducts()" class="btn-secondary">Deselect All</button>
-        <button onclick="addSelectedProducts()" class="btn-primary">
-            <i class="fas fa-plus"></i> Add Selected to Pantry
-        </button>
-    `;
-    
-    itemsList.appendChild(actionButtons);
-    
-    // Store products globally for access
-    window.pantryProducts = products;
-}
-
-function toggleProductSelection(index) {
-    const productItem = document.querySelector(`[data-index="${index}"]`);
-    const checkbox = productItem.querySelector('input[type="checkbox"]');
-    
-    productItem.classList.toggle('selected', checkbox.checked);
-    window.pantryProducts[index].selected = checkbox.checked;
-}
-
-function selectAllProducts() {
-    window.pantryProducts.forEach((product, index) => {
-        product.selected = true;
-        const checkbox = document.querySelector(`[data-index="${index}"] input[type="checkbox"]`);
-        checkbox.checked = true;
-        document.querySelector(`[data-index="${index}"]`).classList.add('selected');
-    });
-}
-
-function deselectAllProducts() {
-    window.pantryProducts.forEach((product, index) => {
-        product.selected = false;
-        const checkbox = document.querySelector(`[data-index="${index}"] input[type="checkbox"]`);
-        checkbox.checked = false;
-        document.querySelector(`[data-index="${index}"]`).classList.remove('selected');
-    });
-}
-
-function addSelectedProducts() {
-    const selectedProducts = window.pantryProducts.filter(product => product.selected);
-    
-    if (selectedProducts.length === 0) {
-        alert('Please select at least one product to add.');
-        return;
-    }
-    
-    let addedCount = 0;
-    
-    selectedProducts.forEach((product, index) => {
-        const expiryDate = document.getElementById(`expiry-${window.pantryProducts.indexOf(product)}`).value;
-        
-        const ingredient = {
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-            name: product.name,
-            expiryDate: expiryDate,
-            barcode: product.barcode,
-            addedDate: new Date().toISOString().split('T')[0]
-        };
-        
-        state.ingredients.push(ingredient);
-        addedCount++;
-    });
-    
-    saveState();
-    renderIngredients();
-    closePantryScanner();
-    
-    showNotification(`Successfully added ${addedCount} items to your pantry!`, 'success');
-}
-
-function closePantryScanner() {
-    // Stop camera
-    const video = document.getElementById('pantry-video');
-    if (video && video.srcObject) {
-        const tracks = video.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-    }
-    
-    // Stop Quagga if running
-    if (typeof Quagga !== 'undefined' && Quagga.stop) {
-        Quagga.stop();
-    }
-    
-    // Remove modal
-    const modal = document.querySelector('.pantry-scanner-modal')?.closest('.modal');
-    if (modal) {
-        modal.remove();
-    }
-    
-    // Clear global variables
-    window.detectedBarcodes = null;
-    window.pantryProducts = null;
-}
-
-// Mobile performance optimizations
-function optimizeForMobile() {
-    // Disable all animations on mobile for better performance
-    const style = document.createElement('style');
-    style.textContent = `
-        @media (max-width: 768px) {
-            * {
-                transition: none !important;
-                animation: none !important;
-                transform: none !important;
-            }
-            
-            .recipe-card:hover,
-            .ingredient-item:hover,
-            .cart-item:hover {
-                transform: none !important;
-                box-shadow: none !important;
-            }
-            
-            .recipe-card:active,
-            .ingredient-item:active,
-            .cart-item:active {
-                transform: scale(0.98) !important;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Throttle scroll events for better performance
-    let scrollTimeout;
-    const scrollHandler = () => {
-        if (scrollTimeout) return;
-        scrollTimeout = setTimeout(() => {
-            scrollTimeout = null;
-        }, 100); // Throttle to 10fps
-    };
-    
-    window.addEventListener('scroll', scrollHandler, { passive: true });
-    
-    // Simplified touch events
-    document.addEventListener('touchstart', function(e) {
-        if (e.target.matches('button, .recipe-card, .ingredient-item, .footer-link')) {
-            e.target.style.opacity = '0.7';
-        }
-    }, { passive: true });
-    
-    document.addEventListener('touchend', function(e) {
-        if (e.target.matches('button, .recipe-card, .ingredient-item, .footer-link')) {
-            e.target.style.opacity = '';
-        }
-    }, { passive: true });
-    
-    // Optimize image loading
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-        img.loading = 'lazy';
-        img.decoding = 'async';
-    });
-    
-    // Reduce DOM queries by caching elements
-    window.mobileOptimizations = {
-        recipeGrid: null,
-        ingredientsList: null,
-        cartItems: null
-    };
-    
-    // Optimize barcode scanning for mobile
-    if (typeof Quagga !== 'undefined') {
-        window.quaggaConfig = {
-            inputStream: {
-                constraints: {
-                    width: 320,
-                    height: 240,
-                    facingMode: "environment"
-                }
-            },
-            decoder: {
-                readers: ["code_128_reader", "ean_reader"]
-            },
-            locate: true,
-            locator: {
-                patchSize: "small",
-                halfSample: true
-            }
-        };
-    }
-}
-
-// Initialize mobile optimizations
-if (window.innerWidth <= 768) {
-    optimizeForMobile();
-    
-    // Add mobile-specific performance optimizations
-    window.mobilePerformance = {
-        debounce: function(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        },
-        
-        throttle: function(func, limit) {
-            let inThrottle;
-            return function() {
-                const args = arguments;
-                const context = this;
-                if (!inThrottle) {
-                    func.apply(context, args);
-                    inThrottle = true;
-                    setTimeout(() => inThrottle = false, limit);
-                }
-            };
-        }
-    };
-    
-    // Debounce search input
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', window.mobilePerformance.debounce(handleSearch, 500));
-    }
-    
-    // Throttle scroll events
-    window.addEventListener('scroll', window.mobilePerformance.throttle(() => {
-        // Minimal scroll handling
-    }, 100));
 }
 
 // Show scanning modal with image preview and OCR processing
@@ -4408,9 +3443,6 @@ function showSharedRecipesModal(friendUsername, recipes, yourPantry, friendPantr
                                     <div class="recipe-meta">
                                         <span><i class="fas fa-clock"></i> ${recipe.strCategory || 'Unknown'}</span>
                                     </div>
-                                    <button class="visual-guide-btn-small" onclick="event.stopPropagation(); visualGuidance.showVisualGuidance(${JSON.stringify(recipe).replace(/"/g, '&quot;')})">
-                                        <i class="fas fa-eye"></i> Visual Guide
-                                    </button>
                                 </div>
                             </div>
                         `).join('')}
@@ -4486,9 +3518,6 @@ function renderRecipesToGrid(recipes, container) {
                             <span class="preview-cooktime"><i class='fas fa-clock'></i> ${cookTime}</span>
                             <span class="preview-missing"><i class='fas fa-exclamation-triangle'></i> Missing: ${missing.length}</span>
                         </div>
-                        <button class="visual-guide-btn-small" onclick="event.stopPropagation(); visualGuidance.showVisualGuidance(${JSON.stringify(recipe).replace(/"/g, '&quot;')})">
-                            <i class="fas fa-eye"></i> Visual Guide
-                        </button>
                         <div class="favorite-star" onclick="event.stopPropagation(); toggleFavorite('${recipe.idMeal}')">
                             <i class="fas fa-star${fav ? '' : '-o'}" style="color:${fav ? '#FFD700' : '#ccc'}"></i>
                         </div>
@@ -4532,7 +3561,7 @@ function showProfileSection(section) {
 
 // Update showSection to render profile page
 window.showSection = function(section) {
-    const sections = ['home', 'pantry', 'cart', 'favorites', 'filters', 'ai-assistant'];
+    const sections = ['home', 'pantry', 'cart', 'favorites', 'filters'];
     sections.forEach(s => {
         const el = document.getElementById(`${s}-section`);
         if (el) el.style.display = (s === section) ? 'block' : 'none';
@@ -4545,8 +3574,7 @@ window.showSection = function(section) {
         home: 0,
         pantry: 1,
         cart: 2,
-        filters: 3,
-        'ai-assistant': 4
+        filters: 3
     };
     const idx = navMap[section];
     if (typeof idx !== 'undefined') {

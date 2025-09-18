@@ -2,17 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyCulinaire - Your AI Cooking Companion</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   </head>
   <body>
-    <!-- Login Page (hidden) -->
-    <div id="login-page" class="login-page" style="display: none;">
+    <!-- Login Page -->
+    <div id="login-page" class="login-page">
       <div class="login-container">
         <div class="login-header">
           <h1 class="login-title">MyCulinaire</h1>
@@ -70,33 +67,11 @@
       </div>
     </div>
 
-    <!-- Main App (shown by default) -->
-    <div id="main-app" class="main-app">
+    <!-- Main App (hidden initially) -->
+    <div id="main-app" class="main-app" style="display: none;">
       <header>
         <nav class="nav sage-header">
-          <div class="header-logo">
-            <div class="logo-icon">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Chef's Hat -->
-                <path d="M20 8C15 8 12 11 12 15V18H28V15C28 11 25 8 20 8Z" fill="white" stroke="#8DA47E" stroke-width="1"/>
-                <!-- Hat Band -->
-                <rect x="12" y="18" width="16" height="2" fill="#8DA47E"/>
-                <!-- Face -->
-                <circle cx="20" cy="26" r="6" fill="#F4E4C1" stroke="#8DA47E" stroke-width="1"/>
-                <!-- Eyes -->
-                <circle cx="17" cy="24" r="1" fill="#8DA47E"/>
-                <circle cx="23" cy="24" r="1" fill="#8DA47E"/>
-                <!-- Smile -->
-                <path d="M16 28C16 28 18 30 20 30C22 30 24 28 24 28" stroke="#8DA47E" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                <!-- Cooking Utensils -->
-                <path d="M30 12L35 7" stroke="#8DA47E" stroke-width="2" stroke-linecap="round"/>
-                <path d="M30 16L33 13" stroke="#8DA47E" stroke-width="2" stroke-linecap="round"/>
-                <path d="M5 12L10 7" stroke="#8DA47E" stroke-width="2" stroke-linecap="round"/>
-                <path d="M5 16L8 13" stroke="#8DA47E" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <h1 class="centered-title" id="logo" onclick="showSection('home')" style="cursor: pointer;">MyCulinaire</h1>
-          </div>
+          <h1 class="centered-title" id="logo" onclick="showSection('home')" style="cursor: pointer;">MyCulinaire</h1>
           <div class="profile-menu">
             <button class="profile-toggle" onclick="toggleProfileMenu()">
               <i class="fas fa-user-circle"></i>
@@ -144,92 +119,22 @@
       </header>
 
     <main>
-      <!-- Home Section - KitchenPal Style -->
+      <!-- Home Section -->
       <section id="home-section">
-        <!-- Smart Search -->
-        <div class="smart-search-section">
-          <h2>What's in your kitchen?</h2>
-          <p>Tell me what ingredients you have, and I'll suggest amazing recipes!</p>
+        <div class="search-section">
+          <h2>Find Ingredients to Buy</h2>
           <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search for ingredients (e.g., chicken, rice, tomatoes)...">
+            <input type="text" id="search-input" placeholder="Search for ingredients to buy...">
             <button onclick="handleSearch()" class="btn-primary">
-              <i class="fas fa-search"></i> Search Ingredients
+              <i class="fas fa-search"></i> Search
             </button>
           </div>
         </div>
 
-        <!-- Pantry Status -->
-        <div class="pantry-status">
-          <h3>Pantry Status</h3>
-          <div class="pantry-stats">
-            <div class="stat-item">
-              <span class="stat-number" id="total-ingredients">0</span>
-              <span class="stat-label">Ingredients</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number" id="expiring-soon">0</span>
-              <span class="stat-label">Expiring Soon</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number" id="available-recipes">0</span>
-              <span class="stat-label">Available Recipes</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recipe Suggestions -->
-        <div class="recipe-suggestions">
-          <h3>Suggested for You</h3>
+        <div class="recommended-section">
+          <h2>Recommended for You</h2>
           <div id="recipes-grid" class="recipes-grid">
             <!-- Recipes will be loaded here -->
-          </div>
-        </div>
-      </section>
-
-      <!-- AI Assistant Section -->
-      <section id="ai-assistant-section" style="display: none;">
-        <div class="ai-assistant-container">
-          <div class="ai-assistant-header">
-            <h2><i class="fas fa-robot"></i> AI Cooking Assistant</h2>
-            <p>Ask me anything about cooking, recipes, or techniques!</p>
-          </div>
-          
-          <div class="ai-chat-container">
-            <div class="ai-chat-messages" id="ai-chat-messages">
-              <div class="ai-message">
-                <div class="ai-avatar">
-                  <i class="fas fa-robot"></i>
-                </div>
-                <div class="ai-message-content">
-                  <p>👋 Hi there! I'm your personal AI cooking assistant, ready to help you create amazing meals!</p>
-                  <p>I can help you with:</p>
-                  <ul>
-                    <li>🍳 Recipe suggestions based on your pantry ingredients</li>
-                    <li>👨‍🍳 Cooking techniques and professional tips</li>
-                    <li>🔄 Ingredient substitutions when you're missing something</li>
-                    <li>📅 Meal planning and prep strategies</li>
-                    <li>🛡️ Food safety and proper storage</li>
-                  </ul>
-                  <p>Just ask me anything about cooking - I'm here to make your culinary journey easier and more fun! 🎉</p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="ai-chat-input-container">
-              <div class="ai-chat-input-wrapper">
-                <input type="text" id="ai-chat-input" placeholder="Ask me anything about cooking..." />
-                <button id="ai-chat-send" class="ai-chat-send">
-                  <i class="fas fa-paper-plane"></i>
-                </button>
-              </div>
-              <div class="ai-chat-suggestions">
-                <button class="suggestion-btn" data-query="What can I make with chicken and rice?">🍽️ Quick dinner ideas</button>
-                <button class="suggestion-btn" data-query="How do I make perfect scrambled eggs?">👨‍🍳 Cooking techniques</button>
-                <button class="suggestion-btn" data-query="What can I substitute for eggs?">🔄 Ingredient swaps</button>
-                <button class="suggestion-btn" data-query="Give me tips for meal prep">📅 Meal planning</button>
-                <button class="suggestion-btn" data-query="What's the best way to store vegetables?">🛡️ Food safety</button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -237,81 +142,18 @@
       <!-- Pantry Section -->
       <section id="pantry-section" style="display: none;">
         <div class="pantry-section">
-          <div class="section-header">
-            <h2>My Pantry</h2>
-          </div>
-          
-          <!-- Add Ingredient Form -->
+          <h2>My Pantry</h2>
           <form id="add-ingredient-form" class="add-form">
             <input type="text" name="name" placeholder="Add ingredient..." required>
             <input type="date" name="expiryDate">
             <button type="submit" class="btn-primary">Add</button>
           </form>
-          
-          <!-- Scan Options -->
           <div class="scan-container">
             <input type="file" id="scan-input" accept="image/*" style="display: none;">
-            <button id="scan-button" class="scan-btn">
+            <button id="scan-button" class="btn-secondary">
               <i class="fas fa-camera"></i> Scan Ingredient
             </button>
-            <button onclick="startBarcodeScan()" class="scan-btn">
-              <i class="fas fa-barcode"></i> Scan Barcode
-            </button>
-            <button onclick="startPantryScan()" class="scan-btn scan-btn-primary">
-              <i class="fas fa-camera"></i> Scan Pantry
-            </button>
           </div>
-          
-          <!-- Pantry Storage Categories -->
-          <div class="pantry-categories">
-            <button onclick="showPantryCategory('fridge')" class="category-btn active" data-category="fridge">
-              <i class="fas fa-snowflake"></i>
-              <span>Fridge</span>
-              <span class="count" id="fridge-count">0</span>
-            </button>
-            <button onclick="showPantryCategory('pantry')" class="category-btn" data-category="pantry">
-              <i class="fas fa-box"></i>
-              <span>Pantry</span>
-              <span class="count" id="pantry-count">0</span>
-            </button>
-            <button onclick="showPantryCategory('freezer')" class="category-btn" data-category="freezer">
-              <i class="fas fa-icicles"></i>
-              <span>Freezer</span>
-              <span class="count" id="freezer-count">0</span>
-            </button>
-            <button onclick="showPantryCategory('spices')" class="category-btn" data-category="spices">
-              <i class="fas fa-pepper-hot"></i>
-              <span>Spices</span>
-              <span class="count" id="spices-count">0</span>
-            </button>
-            <button onclick="showPantryCategory('beverages')" class="category-btn" data-category="beverages">
-              <i class="fas fa-coffee"></i>
-              <span>Beverages</span>
-              <span class="count" id="beverages-count">0</span>
-            </button>
-          </div>
-          
-          <!-- Category Filters -->
-          <div class="pantry-filters">
-            <button onclick="filterIngredients('all')" class="filter-btn active">All</button>
-            <button onclick="filterIngredients('expiring')" class="filter-btn">Expiring Soon</button>
-            <button onclick="filterIngredients('expired')" class="filter-btn">Expired</button>
-            <button onclick="filterIngredients('fruits')" class="filter-btn">Fruits</button>
-            <button onclick="filterIngredients('vegetables')" class="filter-btn">Vegetables</button>
-            <button onclick="filterIngredients('dairy')" class="filter-btn">Dairy</button>
-            <button onclick="filterIngredients('meat')" class="filter-btn">Meat</button>
-            <button onclick="filterIngredients('grains')" class="filter-btn">Grains</button>
-          </div>
-          
-          <!-- Current Category Header -->
-          <div class="current-category-header">
-            <h3 id="current-category-title">Fridge</h3>
-            <div class="category-stats">
-              <span id="category-total">0 items</span>
-              <span id="category-expiring">0 expiring soon</span>
-            </div>
-          </div>
-          
           <div id="ingredients-container" class="ingredients-list">
             <!-- Ingredients will be loaded here -->
           </div>
@@ -397,6 +239,7 @@
           <i class="fas fa-shopping-cart"></i>
           <span>Cart</span>
         </a>
+
         <a href="#" onclick="showSection('filters')" class="footer-link">
           <i class="fas fa-sliders-h"></i>
           <span>Filters</span>
@@ -415,8 +258,6 @@
     <script src="js/pantry-scroll.js?v=1.0"></script>
     <script src="js/ai-features.js?v=1.5"></script>
     <script src="js/cooking-assistant.js?v=1.5"></script>
-    <script src="js/ai-chat.js?v=1.0"></script>
-    <script src="js/visual-guidance.js?v=1.0"></script>
     <script src="js/app.js?v=1.5"></script>
   </body>
 </html> 
